@@ -1,3 +1,23 @@
+'''
+
+TODO
+Writing code Output in file (mabye serialized file)
+Validate Moves 
+
+
+
+ACTION For Moves (ATTACK OR DEFEND)
+for attack call damage_amount where needed
+same for repair_amount
+
+To attack user simply make the user move to a spot where an enemy is
+repair call your given spot
+
+!END OF GAME?
+INPUT N OUTPUT of USER (probs JSON)
+
+'''
+
 from __future__ import annotations
 import argparse
 import copy
@@ -92,6 +112,7 @@ class Unit:
             return target.health
         return amount
 
+
     def repair_amount(self, target: Unit) -> int:
         """How much can this unit repair another unit."""
         amount = self.repair_table[self.type.value][target.type.value]
@@ -149,7 +170,7 @@ class Coord:
     @classmethod
     def from_string(cls, s : str) -> Coord | None:
         """Create a Coord from a string. ex: D2."""
-        s = s.strip()
+        s = s.strip() 
         for sep in " ,.:;-_":
                 s = s.replace(sep, "")
         if (len(s) == 2):
@@ -253,10 +274,10 @@ class Game:
         dim = self.options.dim
         self.board = [[None for _ in range(dim)] for _ in range(dim)]
         md = dim-1
-        self.set(Coord(0,0),Unit(player=Player.Defender,type=UnitType.AI))
-        self.set(Coord(1,0),Unit(player=Player.Defender,type=UnitType.Tech))
-        self.set(Coord(0,1),Unit(player=Player.Defender,type=UnitType.Tech))
-        self.set(Coord(2,0),Unit(player=Player.Defender,type=UnitType.Firewall))
+        self.set(Coord(0,0),Unit(player=Player.Defer,type=UnitType.AI))
+        self.set(Coord(1,0),Unit(player=Player.Defer,type=UnitType.Tech))
+        self.set(Coord(0,1),Unit(player=Player.Defer,type=UnitType.Tech))
+        self.set(Coord(2,0),Unit(player=Player.Defer,type=UnitType.Firewall))
         self.set(Coord(0,2),Unit(player=Player.Defender,type=UnitType.Firewall))
         self.set(Coord(1,1),Unit(player=Player.Defender,type=UnitType.Program))
         self.set(Coord(md,md),Unit(player=Player.Attacker,type=UnitType.AI))
@@ -375,6 +396,7 @@ class Game:
         while True:
             s = input(F'Player {self.next_player.name}, enter your move: ')
             coords = CoordPair.from_string(s)
+            
             if coords is not None and self.is_valid_coord(coords.src) and self.is_valid_coord(coords.dst):
                 return coords
             else:
@@ -543,7 +565,7 @@ def main():
 
     # parse the game type
     if args.game_type == "attacker":
-        game_type = GameType.AttackerVsComp
+        game_type = GameType.AttackerVsComp 
     elif args.game_type == "defender":
         game_type = GameType.CompVsDefender
     elif args.game_type == "manual":
