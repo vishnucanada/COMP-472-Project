@@ -348,6 +348,11 @@ class Game:
             if unit_dst != None and unit_dst.player == self.next_player:
                 health_delta = unit_src.repair_amount(unit_dst)
                 unit_dst.mod_health(health_delta)
+            elif(unit_dst != None and unit_dst.player != self.next_player):
+                health_delta = unit_src.damage_amount(unit_dst)
+                unit_dst.mod_health(health_delta)
+                health_delta = unit_dst.damage_amount(unit_src)
+                unit_src.mod_health(health_delta)
             else:
                 self.set(coords.dst,self.get(coords.src))
                 self.set(coords.src,None)
