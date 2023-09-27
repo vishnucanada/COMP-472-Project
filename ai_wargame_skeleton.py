@@ -274,10 +274,10 @@ class Game:
         dim = self.options.dim
         self.board = [[None for _ in range(dim)] for _ in range(dim)]
         md = dim-1
-        self.set(Coord(0,0),Unit(player=Player.Defer,type=UnitType.AI))
-        self.set(Coord(1,0),Unit(player=Player.Defer,type=UnitType.Tech))
-        self.set(Coord(0,1),Unit(player=Player.Defer,type=UnitType.Tech))
-        self.set(Coord(2,0),Unit(player=Player.Defer,type=UnitType.Firewall))
+        self.set(Coord(0,0),Unit(player=Player.Defender,type=UnitType.AI))
+        self.set(Coord(1,0),Unit(player=Player.Defender,type=UnitType.Tech))
+        self.set(Coord(0,1),Unit(player=Player.Defender,type=UnitType.Tech))
+        self.set(Coord(2,0),Unit(player=Player.Defender,type=UnitType.Firewall))
         self.set(Coord(0,2),Unit(player=Player.Defender,type=UnitType.Firewall))
         self.set(Coord(1,1),Unit(player=Player.Defender,type=UnitType.Program))
         self.set(Coord(md,md),Unit(player=Player.Attacker,type=UnitType.AI))
