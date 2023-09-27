@@ -68,11 +68,11 @@ class Unit:
     health : int = 9
     # class variable: damage table for units (based on the unit type constants in order)
     damage_table : ClassVar[list[list[int]]] = [
-        [3,3,3,3,1], # AI
-        [1,1,6,1,1], # Tech
-        [9,6,1,6,1], # Virus
-        [3,3,3,3,1], # Program
-        [1,1,1,1,1], # Firewall
+        [-3,-3,-3,-3,-1], # AI
+        [-1,-1,-6,-1,-1], # Tech
+        [-9,-6,-1,-6,-1], # Virus
+        [-3,-3,-3,-3,-1], # Program
+        [-1,-1,-1,-1,-1], # Firewall
     ]
     # class variable: repair table for units (based on the unit type constants in order)
     repair_table : ClassVar[list[list[int]]] = [
@@ -338,16 +338,20 @@ class Game:
         if unit_src is None or unit_src.player != self.next_player:
             return False
         unit = self.get(coords.dst)
-        if unit is unit_src:
-            return False
         return True
 
     def perform_move(self, coords : CoordPair) -> Tuple[bool,str]:
         """Validate and perform a move expressed as a CoordPair. TODO: WRITE MISSING CODE!!!"""
         if self.is_valid_move(coords):
-            self.set(coords.dst,self.get(coords.src))
-            self.set(coords.src,None)
-            return (True,"")
+            unit_src = self.get(coords.src)
+            unit_dst = self.get(coords.dst)
+            if unit_dst != None and unit_dst.player == self.next_player:
+                health_delta = unit_src.repair_amount(unit_dst)
+                unit_dst.mod_health(health_delta)
+            else:
+                self.set(coords.dst,self.get(coords.src))
+                self.set(coords.src,None)
+            return (True,"")    
         return (False,"invalid move")
 
     def next_turn(self):
