@@ -160,9 +160,6 @@ class Coord:
             for col in range(self.col-dist,self.col+1+dist):
                 yield Coord(row,col)
 
-               
-
-
     def iter_adjacent(self) -> Iterable[Coord]:
         """Iterates over adjacent Coords."""
         yield Coord(self.row-1,self.col)
@@ -348,9 +345,7 @@ class Game:
         if self.is_valid_move(coords):
             unit_src = self.get(coords.src)
             unit_dst = self.get(coords.dst)
-            if unit_src.player == unit_dst.player:
-                 self.health = 0
-            if unit_dst != None and unit_dst.player == self.next_player:
+            if unit_dst != None and unit_src.player != unit_dst.player and unit_dst.player == self.next_player:
                 health_delta = unit_src.repair_amount(unit_dst)
                 unit_dst.mod_health(health_delta)
             elif(unit_dst != None and unit_dst.player != self.next_player):
@@ -358,6 +353,8 @@ class Game:
                 unit_dst.mod_health(health_delta)
                 health_delta = unit_dst.damage_amount(unit_src)
                 unit_src.mod_health(health_delta)
+            elif(unit_dst != None and unit_src.player == unit_dst.player):
+                print("asssss")
             else:
                 self.set(coords.dst,self.get(coords.src))
                 self.set(coords.src,None)
