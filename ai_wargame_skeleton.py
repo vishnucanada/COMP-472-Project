@@ -274,10 +274,10 @@ class Game:
         dim = self.options.dim
         self.board = [[None for _ in range(dim)] for _ in range(dim)]
         md = dim-1
-        self.set(Coord(0,0),Unit(player=Player.Defer,type=UnitType.AI))
-        self.set(Coord(1,0),Unit(player=Player.Defer,type=UnitType.Tech))
-        self.set(Coord(0,1),Unit(player=Player.Defer,type=UnitType.Tech))
-        self.set(Coord(2,0),Unit(player=Player.Defer,type=UnitType.Firewall))
+        self.set(Coord(0,0),Unit(player=Player.Defender,type=UnitType.AI))
+        self.set(Coord(1,0),Unit(player=Player.Defender,type=UnitType.Tech))
+        self.set(Coord(0,1),Unit(player=Player.Defender,type=UnitType.Tech))
+        self.set(Coord(2,0),Unit(player=Player.Defender,type=UnitType.Firewall))
         self.set(Coord(0,2),Unit(player=Player.Defender,type=UnitType.Firewall))
         self.set(Coord(1,1),Unit(player=Player.Defender,type=UnitType.Program))
         self.set(Coord(md,md),Unit(player=Player.Attacker,type=UnitType.AI))
@@ -345,7 +345,7 @@ class Game:
         if self.is_valid_move(coords):
             unit_src = self.get(coords.src)
             unit_dst = self.get(coords.dst)
-            if unit_dst != None and unit_dst.player == self.next_player:
+            if unit_dst != None and unit_src.player != unit_dst.player and unit_dst.player == self.next_player:
                 health_delta = unit_src.repair_amount(unit_dst)
                 unit_dst.mod_health(health_delta)
             elif(unit_dst != None and unit_dst.player != self.next_player):
@@ -353,6 +353,8 @@ class Game:
                 unit_dst.mod_health(health_delta)
                 health_delta = unit_dst.damage_amount(unit_src)
                 unit_src.mod_health(health_delta)
+            elif(unit_dst != None and unit_src.player == unit_dst.player):
+                print("asssss")
             else:
                 self.set(coords.dst,self.get(coords.src))
                 self.set(coords.src,None)
