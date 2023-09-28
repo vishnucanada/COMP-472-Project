@@ -269,6 +269,25 @@ class Game:
     _attacker_has_ai : bool = True
     _defender_has_ai : bool = True
 
+
+    
+    def create_file(self,b,t,m) -> str:
+        b = str(b)
+        t = str(t)
+        m = str(m)
+        file_name = "gameTrace-"+str(b)+"-"+t+"-"+m+".txt"
+        f = open(file_name,"a")
+        f.close()
+        return str(file_name)
+    
+    
+    def write_to_file(self,file_name):
+        r = 5
+        f = open(file_name,"a")
+        entire_output = self.to_string()
+        f.write(entire_output)
+        f.close()
+
     def __post_init__(self):
         """Automatically called after class init to set up the default board state."""
         dim = self.options.dim
@@ -602,13 +621,22 @@ def main():
     if args.broker is not None:
         options.broker = args.broker
 
+
     # create a new game
     game = Game(options=options)
 
+    #CREATING THE FILE THAT WILL BE WRITTEN TO
+    b = options.alpha_beta
+    t = options.max_time
+    m = options.max_turns
+    
+    file_name = game.create_file(b,t,m)
     # the main game loop
     while True:
         print()
         print(game)
+        game.write_to_file(file_name)
+
         winner = game.has_winner()
         if winner is not None:
             print(f"{winner.name} wins!")
