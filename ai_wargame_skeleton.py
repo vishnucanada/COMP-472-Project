@@ -354,7 +354,12 @@ class Game:
                 health_delta = unit_dst.damage_amount(unit_src)
                 unit_src.mod_health(health_delta)
             elif(unit_dst != None and unit_src.player == unit_dst.player):
-                print("asssss")
+                for coord in coords.src.iter_range(1):  # Adjust the range as needed
+                    unit = self.get(coord)
+                    if unit is not None:
+                        damage_amount = unit.damage_amount(unit_dst)
+                        unit.mod_health(damage_amount)   
+                self.mod_health(coords.src, -9)
             else:
                 self.set(coords.dst,self.get(coords.src))
                 self.set(coords.src,None)
