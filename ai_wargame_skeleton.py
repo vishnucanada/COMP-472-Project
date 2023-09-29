@@ -359,22 +359,31 @@ class Game:
             return False
         if unit_src is None or unit_src.player != self.next_player: #If current player is not using its entity (source)
             return False
-        
-        if unit_src.player._value_ == Player.Attacker._value_ and unit_src.type._value_ == (0 or 3 or 4): #Player: attacker with entity of either type AI, firewall or program
-            for coord in coords.src.iter_adjacent(): 
-                if (coord == coords.dst) and ((coord.row < coords.src.row) or (coord.col < coords.src.col)):
-                    return True  
-            return False
-        
-        if unit_src.player._value_ == Player.Defender._value_ and unit_src.type._value_ == (0 or 3 or 4): #Player: defender with entity of either type AI, firewall or program
-            for coord in coords.src.iter_adjacent(): 
-                if (coord == coords.dst) and ((coord.row > coords.src.row) or (coord.col > coords.src.col)):
-                    return True  
-            return False
-        
-        if unit_src.type._value_ == (1 or 2): #Entity of either type Tech or virus can move up, down, left or right
+
+        if unit_src.type._value_ in [0, 3, 4]: #Entity of either type AI, firewall or program 
+            
+            for coord in coords.src.iter_adjacent():
+                adjacent_coord = self.get(coord)
+                if adjacent_coord != None and unit_src.player != adjacent_coord.player: # Check if the adjacent unit is an adversarial unit
+                    print("You are currently engaged in combat. Select another entity to move.")
+                    return False
+                    
+            if unit_src.player._value_ == Player.Attacker._value_: #Player: Attacker
+                for coord in coords.src.iter_adjacent(): 
+                    if (coord == coords.dst) and ((coord.row < coords.src.row) or (coord.col < coords.src.col)): #Can move up or left
+                        return True  
+                return False
+            
+            if unit_src.player._value_ == Player.Defender._value_: #Player: Defender
+                for coord in coords.src.iter_adjacent(): 
+                    if (coord == coords.dst) and ((coord.row > coords.src.row) or (coord.col > coords.src.col)): #Can move down or right
+                        return True  
+                return False
+
+
+        if unit_src.type._value_ in [1, 2]: #Entity of either type Tech or virus
             for unit_dst in coords.src.iter_adjacent():  
-                    if unit_dst is coords.dst:
+                    if unit_dst is coords.dst: #Can move given any coords from iter_adjacent
                        return True  
             return False
         
