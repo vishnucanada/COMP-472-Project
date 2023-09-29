@@ -351,28 +351,43 @@ class Game:
 
     def is_valid_move(self, coords : CoordPair) -> bool:
         """Validate a move expressed as a CoordPair. TODO: WRITE MISSING CODE!!!"""
-        if not self.is_valid_coord(coords.src) or not self.is_valid_coord(coords.dst):
-            return False
         unit_src = self.get(coords.src)
-        if unit_src is None or unit_src.player != self.next_player:
+        unit_dst = self.get(coords.dst)
+
+        if not self.is_valid_coord(coords.src) or not self.is_valid_coord(coords.dst): #If coords are not in the board
             return False
-        unit = self.get(coords.dst)
+        if unit_src is None or unit_src.player != self.next_player: #If current player is not using its entity (source)
+            return False
         return True
+    """
+        if unit_src.player._value_ == Player.Attacker._value_ and unit_src.type._value_ == (0 or 3 or 4): #Player: attacker with entity of either type AI, firewall or program
+            
+            return True
+        if unit_src.player._value_ == Player.Defender._value_ and unit_src.type._value_ == (0 or 3 or 4): #Player: defender with entity of either type AI, firewall or program
+            
+            return True
+        if unit_src.type._value_ == (1 or 2): #Entity of either type Tech or virus can move up, down, left or right
+            for coord_dst in unit_src.iter_adjacent():  
+                    if unit_dst is coord_dst:
+                       return True  
+            return False
+    """
+        
 
     def perform_move(self, coords : CoordPair) -> Tuple[bool,str]:
         """Validate and perform a move expressed as a CoordPair. TODO: WRITE MISSING CODE!!!"""
         if self.is_valid_move(coords):
             unit_src = self.get(coords.src)
             unit_dst = self.get(coords.dst)
-            if unit_dst != None and unit_src.player != unit_dst.player and unit_dst.player == self.next_player:
+            if unit_dst != None and coords.dst != coords.src and unit_src.player == unit_dst.player:
                 health_delta = unit_src.repair_amount(unit_dst)
                 unit_dst.mod_health(health_delta)
-            elif(unit_dst != None and unit_dst.player != self.next_player):
+            elif unit_dst != None and unit_dst.player != self.next_player:
                 health_delta = unit_src.damage_amount(unit_dst)
                 unit_dst.mod_health(health_delta)
                 health_delta = unit_dst.damage_amount(unit_src)
                 unit_src.mod_health(health_delta)
-            elif(unit_dst != None and unit_src.player == unit_dst.player):
+            elif unit_dst != None and unit_src.player == unit_dst.player:
                 for coord in coords.src.iter_range(1):  # Adjust the range as needed
                     unit = self.get(coord)
                     if unit is not None:
