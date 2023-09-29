@@ -591,6 +591,10 @@ class Game:
 
 def main():
     # parse command line arguments
+    max_turns = int(input("Please enter a maximum amount of turns allowed: "))
+    max_time = int(input("Please enter a maximum amount(in seconds) that AI is allowed to take: "))
+
+
     parser = argparse.ArgumentParser(
         prog='ai_wargame',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -600,6 +604,7 @@ def main():
     parser.add_argument('--broker', type=str, help='play via a game broker')
     args = parser.parse_args()
 
+    
     # parse the game type
     if args.game_type == "attacker":
         game_type = GameType.AttackerVsComp 
@@ -613,6 +618,8 @@ def main():
     # set up game options
     options = Options(game_type=game_type)
 
+    options.max_turns = max_turns
+    options.max_time = max_time
     # override class defaults via command line options
     if args.max_depth is not None:
         options.max_depth = args.max_depth
