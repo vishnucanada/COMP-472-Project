@@ -359,9 +359,10 @@ class Game:
             return False
         if unit_src is None or unit_src.player != self.next_player: #If current player is not using its entity (source)
             return False
+        if unit_dst != None and unit_src.player == unit_dst.player: #Allow self-destruct
+            return True
 
         if unit_src.type._value_ in [0, 3, 4]: #Entity of either type AI, firewall or program 
-            
             for coord in coords.src.iter_adjacent():
                 adjacent_coord = self.get(coord)
                 if adjacent_coord != None and unit_src.player != adjacent_coord.player: # Check if the adjacent unit is an adversarial unit
@@ -404,7 +405,7 @@ class Game:
                 unit_dst.mod_health(health_delta)
                 health_delta = unit_dst.damage_amount(unit_src)
                 unit_src.mod_health(health_delta)
-            elif unit_dst != None and unit_src.player == unit_dst.player:
+            elif unit_dst != None and unit_src.player == unit_dst.player: #Self destruction
                 for coord in coords.src.iter_range(1):  # Adjust the range as needed
                     unit = self.get(coord)
                     if unit is not None:
