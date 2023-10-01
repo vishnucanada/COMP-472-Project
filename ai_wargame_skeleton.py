@@ -282,11 +282,20 @@ class Game:
     
     
     def write_to_file(self,file_name):
-        r = 5
         f = open(file_name,"a")
         entire_output = self.to_string()
         f.write(entire_output)
         f.close()
+
+    def write_to_file_string(self,string_to_write):
+        b = str(self.options.alpha_beta)
+        t = str(self.options.max_time)
+        m = str(self.options.max_turns)
+        file_name = "gameTrace-"+str(b)+"-"+t+"-"+m+".txt"
+        f = open(file_name,"a")
+        f.write(string_to_write)
+        f.close()
+
 
     def __post_init__(self):
         """Automatically called after class init to set up the default board state."""
@@ -433,7 +442,7 @@ class Game:
         while True:
             s = input(F'Player {self.next_player.name}, enter your move: ')
             coords = CoordPair.from_string(s)
-            
+            self.write_to_file_string('Player '+self.next_player.name+' played move '+s+'\n')
             if coords is not None and self.is_valid_coord(coords.src) and self.is_valid_coord(coords.dst):
                 return coords
             else:
@@ -473,6 +482,7 @@ class Game:
             if success:
                 print(f"Computer {self.next_player.name}: ",end='')
                 print(result)
+                
                 self.next_turn()
         return mv
 
