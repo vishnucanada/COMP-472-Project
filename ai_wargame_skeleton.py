@@ -1,22 +1,3 @@
-'''
-
-TODO
-Writing code Output in file (mabye serialized file)
-Validate Moves 
-
-
-
-ACTION For Moves (ATTACK OR DEFEND)
-for attack call damage_amount where needed
-same for repair_amount
-
-To attack user simply make the user move to a spot where an enemy is
-repair call your given spot
-
-!END OF GAME?
-INPUT N OUTPUT of USER (probs JSON)
-
-'''
 
 from __future__ import annotations
 import argparse
