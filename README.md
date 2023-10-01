@@ -1,10 +1,11 @@
 # COMP-472-Project
 
 Overview
+
 Two players alternately make movements on a grid in this text-based strategy game. The game may be played with AI opponents or with two human players. The aim of the game is to beat the rival team's units and take the victory.
 
 
-How to Play
+HOW TO PLAY
 
 Follow these instructions to play the game:
 - Use the command python ai_wargame.py to run the Python script.
