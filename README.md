@@ -5,6 +5,7 @@ Two players alternately make movements on a grid in this text-based strategy gam
 
 
 How to Play
+
 Follow these instructions to play the game:
 - Use the command python ai_wargame.py to run the Python script.
 - The maximum number of turns and the maximum length of time (in seconds) that AI players can take between movements will both need to be entered.
@@ -13,6 +14,7 @@ Follow these instructions to play the game:
 
 
 CODE STRUCTURE
+
 The code is structured into a number of classes and functions, each with a distinct function. Here is a summary of the key elements:
 - Unit: Describes the types, health, and skills of gaming units.
 - Coord: Provides techniques for working with coordinates and represents coordinates on the game board.
@@ -37,12 +39,13 @@ GAME RULES
 
 
 ARGUMENTS 
+
 You can modify the game using a number of command-line options that the program accepts:
 
---max_depth: Defines the maximum depth of the search for AI moves.
---max_time: Defines the most time (in seconds) that AI players may spend planning their movements.
---game_type: Define the type of game. There are three options: "auto," "attacker," "defender," and "manual."
---broker: Use an unfinished game broker to access the game.
+- --max_depth: Defines the maximum depth of the search for AI moves.
+- --max_time: Defines the most time (in seconds) that AI players may spend planning their movements.
+- --game_type: Define the type of game. There are three options: "auto," "attacker," "defender," and "manual."
+- --broker: Use an unfinished game broker to access the game.
 To change the game settings, use these arguments when running the script.
 
 
