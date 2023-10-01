@@ -162,10 +162,11 @@ class Coord:
 
     def iter_adjacent(self) -> Iterable[Coord]:
         """Iterates over adjacent Coords."""
-        yield Coord(self.row-1,self.col)
-        yield Coord(self.row,self.col-1)
-        yield Coord(self.row+1,self.col)
-        yield Coord(self.row,self.col+1)
+        yield Coord(self.row,self.col-1) #left
+        yield Coord(self.row-1,self.col) #up
+        yield Coord(self.row+1,self.col) #down
+        yield Coord(self.row,self.col+1) #right
+    
 
     @classmethod
     def from_string(cls, s : str) -> Coord | None:
@@ -360,28 +361,79 @@ class Game:
 
     def is_valid_move(self, coords : CoordPair) -> bool:
         """Validate a move expressed as a CoordPair. TODO: WRITE MISSING CODE!!!"""
-        if not self.is_valid_coord(coords.src) or not self.is_valid_coord(coords.dst):
-            return False
         unit_src = self.get(coords.src)
-        if unit_src is None or unit_src.player != self.next_player:
+        unit_dst = self.get(coords.dst)
+
+        if not self.is_valid_coord(coords.src) or not self.is_valid_coord(coords.dst): 
+            #If coords are not in the board
             return False
-        unit = self.get(coords.dst)
+        if unit_src is None or unit_src.player != self.next_player: 
+            #If current player is not using its entity (source)
+            return False
+        if unit_dst is not None and unit_dst is unit_src:
+            return True
+
+        if unit_src.type._value_ in [0, 3, 4]: 
+            #Entity of either type AI, firewall or program 
+            
+            if unit_dst is None: 
+                #Check when player wants to move to an empty spot
+                for coord in coords.src.iter_adjacent():
+                    adjacent_coord = self.get(coord)
+                    if adjacent_coord != None and unit_src.player != adjacent_coord.player: 
+                        #Check if the adjacent unit is an adversarial unit
+                        print("You are currently engaged in combat. Select another entity to move.")
+                        return False
+                        
+                if unit_src.player._value_ == Player.Attacker._value_: #Player: Attacker
+                    for coord in coords.src.iter_adjacent(): 
+                        if (coord == coords.dst) and ((coord.row < coords.src.row) or (coord.col < coords.src.col)): 
+                            #Accepted adjacent moves are only in the up or left direction
+                            return True  
+                    return False
+                
+                if unit_src.player._value_ == Player.Defender._value_: #Player: Defender
+                    for coord in coords.src.iter_adjacent(): 
+                        if (coord == coords.dst) and ((coord.row > coords.src.row) or (coord.col > coords.src.col)): 
+                            #Accepted adjacent moves are only in the down or right direction
+                            return True  
+                    return False
+            else: 
+                #When player wants to attack or repair an entity
+                for coord in coords.src.iter_adjacent():  
+                    if coord == coords.dst: 
+                        #Any adjacent moves are accepted 
+                        return True  
+                return False
+
+
+        if unit_src.type._value_ in [1, 2]: 
+            #Entity of either type Tech or virus
+            for coord in coords.src.iter_adjacent():  
+                if coord == coords.dst: 
+                    #Any adjacent moves are accepted 
+                    return True  
+            return False
+        
         return True
+    
+        
 
     def perform_move(self, coords : CoordPair) -> Tuple[bool,str]:
         """Validate and perform a move expressed as a CoordPair. TODO: WRITE MISSING CODE!!!"""
         if self.is_valid_move(coords):
             unit_src = self.get(coords.src)
             unit_dst = self.get(coords.dst)
-            if unit_dst != None and unit_src.player != unit_dst.player and unit_dst.player == self.next_player:
+            if unit_dst != None and coords.dst != coords.src and unit_src.player == unit_dst.player:
                 health_delta = unit_src.repair_amount(unit_dst)
                 unit_dst.mod_health(health_delta)
-            elif(unit_dst != None and unit_dst.player != self.next_player):
+
+            elif unit_dst != None and unit_dst.player != self.next_player:
                 health_delta = unit_src.damage_amount(unit_dst)
                 unit_dst.mod_health(health_delta)
                 health_delta = unit_dst.damage_amount(unit_src)
                 unit_src.mod_health(health_delta)
-            elif(unit_dst != None and unit_src.player == unit_dst.player):
+            elif unit_dst != None and unit_src.player == unit_dst.player: #Self destruction
                 for coord in coords.src.iter_range(1):  # Adjust the range as needed
                     unit = self.get(coord)
                     if unit is not None:
