@@ -63,7 +63,13 @@ class Unit:
         [0,0,0,0,0], # Program
         [0,0,0,0,0], # Firewall
     ]
-
+    e0_evalution : ClassVar[list[int]] =[
+        9999,
+        3,
+        3,
+        3,
+        3,
+    ]
     
 
     def is_alive(self) -> bool:
@@ -103,7 +109,7 @@ class Unit:
             return 9 - target.health
         return amount
 
-    def e0_evaluation_amount(self,target: Unit) -> int:
+    def e0_evaluation_amount(self) -> int:
         """Similar to  repair amount, determine the heursitic amount"""
         return self.e0_evaluation[self.type.value]
 
@@ -579,15 +585,15 @@ class Game:
         value = MAX_HEURISTIC_SCORE
         if maximize:
             value = MIN_HEURISTIC_SCORE
-        x = None
-        y = None
-        result = self.has_winner() #heuristic
+    
+        result = self.has_winner()
+        # return the winner value or the heuristic 
         if result == Player.Defender:
-            return (-1, x, y)
+            return -1
         elif result == Player.Attacker:
-            return (1, x, y)
+            return 1
         elif result == None:
-            return (0, x, y)
+            return self.heuristic_zero()
 
         best_move = None
 
