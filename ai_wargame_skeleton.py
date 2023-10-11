@@ -64,6 +64,14 @@ class Unit:
         [0,0,0,0,0], # Firewall
     ]
 
+    e0_heuristic_table : ClassVar[list[list[int]]] = [
+        [9999], # AI
+        [3], # Tech
+        [3], # Virus
+        [3], # Program
+        [3], # Firewall
+    ]
+
     def is_alive(self) -> bool:
         """Are we alive ?"""
         return self.health > 0
@@ -341,7 +349,7 @@ class Game:
             self.remove_dead(coord)
 
     def is_valid_move(self, coords : CoordPair) -> bool:
-        """Validate a move expressed as a CoordPair. TODO: WRITE MISSING CODE!!!"""
+        """Validate a move expressed as a CoordPair"""
         unit_src = self.get(coords.src)
         unit_dst = self.get(coords.dst)
 
@@ -398,10 +406,10 @@ class Game:
         
         return True
     
-        
+
 
     def perform_move(self, coords : CoordPair) -> Tuple[bool,str]:
-        """Validate and perform a move expressed as a CoordPair. TODO: WRITE MISSING CODE!!!"""
+        """Validate and perform a move expressed as a CoordPair"""
         if self.is_valid_move(coords):
             unit_src = self.get(coords.src)
             unit_dst = self.get(coords.dst)
@@ -426,6 +434,7 @@ class Game:
                 self.set(coords.src,None)
             return (True,"")    
         return (False,"invalid move")
+
 
     def next_turn(self):
         """Transitions game to the next turn."""
@@ -534,13 +543,12 @@ class Game:
         """Check if the game is over and returns winner"""
         if self.options.max_turns is not None and self.turns_played >= self.options.max_turns:
             return Player.Defender
-        elif self._attacker_has_ai:
+        if self._attacker_has_ai:
             if self._defender_has_ai:
                 return None
             else:
                 return Player.Attacker    
-        elif self._defender_has_ai:
-            return Player.Defender
+        return Player.Defender
 
     def move_candidates(self) -> Iterable[CoordPair]:
         """Generate valid move candidates for the next player."""
@@ -563,10 +571,52 @@ class Game:
         else:
             return (0, None, 0)
 
+    def minimax(self, maximize):
+        """ Minimizing for defender and maximizing for attacker meaning
+        Attacker wins: positive score
+        Defender wins: negative score
+        Tie: score of 0
+        
+        value is initiallized to its worst case. When mazimizing, set it to a large negative number and vice versa"""
+        value = MAX_HEURISTIC_SCORE
+        if maximize:
+            value = MIN_HEURISTIC_SCORE
+        x = None
+        y = None
+        result = self.has_winner() #heuristic
+        if result == Player.Defender:
+            return (-1, x, y)
+        elif result == Player.Attacker:
+            return (1, x, y)
+        elif result == None:
+            return (0, x, y)
+
+        best_move = None
+
+        # evaluate all possible children states and pick the optimal one
+        # depending on whether we are maximizing or minimizing
+        for move in self.move_candidates():
+            if maximize:
+                v = self.minimax(maximize=False)
+                if v > value:
+                    value = v
+                    best_move = move
+            else:
+                v = self.minimax(maximize=True)
+                if v < value:
+                    value = v
+                    best_move = move
+
+        return value, best_move
+
+
+    def alpha_beta_pruning(self, maximize):
+        return True
+
     def suggest_move(self) -> CoordPair | None:
         """Suggest the next move using minimax alpha beta. TODO: REPLACE RANDOM_MOVE WITH PROPER GAME LOGIC!!!"""
         start_time = datetime.now()
-        (score, move, avg_depth) = self.random_move()
+        (score, move, avg_depth) = self.alpha_beta_pruning(maximize = (self.next_player == Player.Attacker), alpha=float('-inf'), beta=float('inf'))
         elapsed_seconds = (datetime.now() - start_time).total_seconds()
         self.stats.total_seconds += elapsed_seconds
         print(f"Heuristic score: {score}")
