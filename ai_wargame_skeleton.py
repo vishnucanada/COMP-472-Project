@@ -63,12 +63,13 @@ class Unit:
         [0,0,0,0,0], # Program
         [0,0,0,0,0], # Firewall
     ]
-    e0_evalution : ClassVar[list[int]] =[
-        9999,
-        3,
-        3,
-        3,
-        3,
+
+    e0_evaluation : ClassVar[list[int]]=[
+        9999, # AI 
+        3, # Tech 
+        3, # Virus
+        3, # Program
+        3 # Firewall
     ]
     
 
@@ -700,11 +701,13 @@ class Game:
 ##############################################################################################################
 
 def main():
+
     # parse command line arguments
     max_turns = int(input("Please enter a maximum amount of turns allowed: "))
     max_time = int(input("Please enter a maximum amount(in seconds) that AI is allowed to take: "))
 
-
+    game_mode = str(input("Please enter a specified game mode \n Modes \n attacker \n defender \n manual \n computer \n"))
+    
     parser = argparse.ArgumentParser(
         prog='ai_wargame',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -714,7 +717,7 @@ def main():
     parser.add_argument('--broker', type=str, help='play via a game broker')
     args = parser.parse_args()
 
-    
+    args.game_type = game_mode
     # parse the game type
     if args.game_type == "attacker":
         game_type = GameType.AttackerVsComp 
