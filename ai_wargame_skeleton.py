@@ -612,7 +612,7 @@ class Game:
                     value = v
                     best_move = move
 
-        return value, best_move
+        return value, best_move, 0
 
 
     def alpha_beta_pruning(self, maximize):
@@ -621,7 +621,12 @@ class Game:
     def suggest_move(self) -> CoordPair | None:
         """Suggest the next move using minimax alpha beta. TODO: REPLACE RANDOM_MOVE WITH PROPER GAME LOGIC!!!"""
         start_time = datetime.now()
-        (score, move, avg_depth) = self.alpha_beta_pruning(maximize = (self.next_player == Player.Attacker), alpha=float('-inf'), beta=float('inf'))
+        maximize = (self.next_player is Player.Attacker)
+    
+        if self.options.alpha_beta:
+            (score, move, avg_depth) = self.alpha_beta_pruning(maximize)
+        else:
+            (score, move, avg_depth) = self.minimax(maximize)
         elapsed_seconds = (datetime.now() - start_time).total_seconds()
         self.stats.total_seconds += elapsed_seconds
         print(f"Heuristic score: {score}")
@@ -691,9 +696,9 @@ class Game:
             unit = self.get(coord)
             if unit is not None:
                 if unit.player == Player.Defender:
-                    heuristic_value = heuristic_value - unit.e0_evaluation_amount
+                    heuristic_value -=  unit.e0_evaluation_amount()
                 else:
-                    heuristic_value = heuristic_value + unit.e0_evaluation_amount
+                    heuristic_value += unit.e0_evaluation_amount()
         return heuristic_value
 
     
@@ -705,8 +710,8 @@ def main():
     # parse command line arguments
     max_turns = int(input("Please enter a maximum amount of turns allowed: "))
     max_time = int(input("Please enter a maximum amount(in seconds) that AI is allowed to take: "))
-
-    game_mode = str(input("Please enter a specified game mode \n Modes \n attacker \n defender \n manual \n computer \n"))
+    alpha_value = str(input("Please enter whether or not you are using Alpha Beta Pruning (True or False): "))
+    game_mode = str(input("Please enter a specified game mode: \n attacker \n defender \n manual \n computer \n"))
     
     parser = argparse.ArgumentParser(
         prog='ai_wargame',
@@ -733,6 +738,10 @@ def main():
 
     options.max_turns = max_turns
     options.max_time = max_time
+    if alpha_value == "False":
+        options.alpha_beta = False
+    else:
+        options.alpha_beta = alpha_value
     # override class defaults via command line options
     if args.max_depth is not None:
         options.max_depth = args.max_depth
