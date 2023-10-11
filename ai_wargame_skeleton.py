@@ -710,7 +710,7 @@ def main():
     # parse command line arguments
     max_turns = int(input("Please enter a maximum amount of turns allowed: "))
     max_time = int(input("Please enter a maximum amount(in seconds) that AI is allowed to take: "))
-    alpha_value = str(input("Please enter whether or not you are using Alpha Beta Pruning (True or False): "))
+    alpha_value = str(input("Please enter whether or not you are using Alpha-Beta Pruning (True or False): "))
     game_mode = str(input("Please enter a specified game mode: \n attacker \n defender \n manual \n computer \n"))
     
     parser = argparse.ArgumentParser(
