@@ -64,13 +64,7 @@ class Unit:
         [0,0,0,0,0], # Firewall
     ]
 
-    e0_heuristic_table : ClassVar[list[list[int]]] = [
-        [9999], # AI
-        [3], # Tech
-        [3], # Virus
-        [3], # Program
-        [3], # Firewall
-    ]
+    
 
     def is_alive(self) -> bool:
         """Are we alive ?"""
@@ -108,6 +102,10 @@ class Unit:
         if target.health + amount > 9:
             return 9 - target.health
         return amount
+
+    def e0_evaluation_amount(self,target: Unit) -> int:
+        """Similar to  repair amount, determine the heursitic amount"""
+        return self.e0_evaluation[self.type.value]
 
 ##############################################################################################################
 
@@ -679,7 +677,20 @@ class Game:
         except Exception as error:
             print(f"Broker error: {error}")
         return None
+        
+    def heuristic_zero(self):
+        heuristic_value = 0
+        for coord in CoordPair.from_dim(self.options.dim).iter_rectangle():
+            unit = self.get(coord)
+            if unit is not None:
+                if unit.player == Player.Defender:
+                    heuristic_value = heuristic_value - unit.e0_evaluation_amount
+                else:
+                    heuristic_value = heuristic_value + unit.e0_evaluation_amount
+        return heuristic_value
 
+    
+    
 ##############################################################################################################
 
 def main():
