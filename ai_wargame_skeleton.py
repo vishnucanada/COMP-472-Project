@@ -693,20 +693,90 @@ class Game:
         except Exception as error:
             print(f"Broker error: {error}")
         return None
-        
+     
     def heuristic_zero(self):
         heuristic_value = 0
         for coord in CoordPair.from_dim(self.options.dim).iter_rectangle():
             unit = self.get(coord)
             if unit is not None:
+                
                 if unit.player == Player.Defender:
                     heuristic_value -=  unit.e0_evaluation_amount()
                 else:
                     heuristic_value += unit.e0_evaluation_amount()
         return heuristic_value
+    
+    def number_of_valid_moves_but_faster(self,coords: CoordPair) -> int:
+        """
+        This is a faster way to check number of valid moves, because it does not account for attacks and repairs,
+        only for probable positions to move too
+        """
 
+        coord_row = coords.src.row
+        coord_col = coords.src.col
+        array_of_valid_moves = [self.is_valid_coord(Coord(coord_row,coord_col-1)), self.is_valid_coord(Coord(coord_row-1,coord_col)),self.is_valid_coord(Coord(coord_row+1,coord_col)),self.is_valid_coord(Coord(coord_row,coord_col+1))] 
+        return sum(array_of_valid_moves)
+
+    def number_of_valid_moves(self,coords : CoordPair) -> int:
+        """
+        For one of the heuristics, We want to know how many legal moves are possible, which also equates to position
+        """
+        #Up down left right, so it will only run a max of 4 times
+        valid_moves = 0
+        iteratable_coords = list(coords.src.iter_adjacent())
+        for coordinate_to_move in iteratable_coords:
+            if self.is_valid_move(coordinate_to_move) :
+                valid_moves = valid_moves + 1
+        return valid_moves
     
-    
+    def compare_units(unit_you: Unit, unit_enemy:Unit) -> int:
+        
+        if unit_you.type == UnitType.AI and unit_enemy.type == UnitType.Virus:
+            return -9999
+        elif unit_you.type == UnitType.Virus and unit_enemy.type == UnitType.Tech:
+            return -10
+        elif unit_you.type == UnitType.Virus and unit_enemy.type == UnitType.AI:
+            return 9999
+        elif unit_you.type == UnitType.Virus and unit_enemy.type == UnitType.Program:
+            return 1000
+        elif unit_you.type == UnitType.Tech and unit_enemy.type == UnitType.Virus:
+            return 100
+        elif unit_you.type == UnitType.Firewall and (unit_enemy.type == UnitType.AI or unit_enemy.type == UnitType.Program or unit_enemy.type == UnitType.Virus or unit_enemy.type == UnitType.Tech):
+            return 1
+        else:
+            return 0
+   
+
+    def heuristic_one(self):
+        """
+        In the beginning of the game POSITION Matters more than piece trading, so assuming weve gone less than a depth of 5, 
+        use this heuristic
+        """
+        heuristic_value = 0
+        for coord in CoordPair.from_dim(self.options.dim).iter_rectangle():
+            unit = self.get(coord)
+            
+            if unit is not None and self.is_valid_coord(coord):
+                if unit.player == Player.Defender:
+                    heuristic_value -=  self.number_of_valid_moves(coord)
+                else:
+                    heuristic_value += self.number_of_valid_moves(coord)
+        return heuristic_value
+
+    def heursitc_two(self):
+        """
+        Endgame heuristic, once we get deeper in the game, pieces matter more than position as well as
+        those pieces in relation to the pieces they are near
+        """
+        heuristic_value = 0
+        for coord in CoordPair.from_dim(self.options.dim).iter_rectangle():
+            unit = self.get(coord)
+            if unit is not None:
+                for surrounding_units in coord.iter_range(1):
+                    heuristic_value += self.compare_units(unit,surrounding_units)
+        
+        return heuristic_value
+
 ##############################################################################################################
 
 def main():
