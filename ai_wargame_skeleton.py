@@ -586,13 +586,17 @@ class Game:
         value = MAX_HEURISTIC_SCORE
         if maximize:
             value = MIN_HEURISTIC_SCORE
-    
+        start_time = datetime.now()
+        self.time(start_time)
+
+
         result = self.has_winner()
         # return the winner value or the heuristic 
+    
         if result == Player.Defender:
-            return -1
+            return -1, None, 0
         elif result == Player.Attacker:
-            return 1
+            return 1, None, 0
         elif result == None:
             return self.heuristic_zero()
 
@@ -618,6 +622,10 @@ class Game:
     def alpha_beta_pruning(self, maximize):
         return True
 
+    def time(self, start_time):
+        elapsed_seconds = (datetime.now() - start_time).total_seconds()
+        self.stats.total_seconds += elapsed_seconds
+
     def suggest_move(self) -> CoordPair | None:
         """Suggest the next move using minimax alpha beta. TODO: REPLACE RANDOM_MOVE WITH PROPER GAME LOGIC!!!"""
         start_time = datetime.now()
@@ -627,8 +635,7 @@ class Game:
             (score, move, avg_depth) = self.alpha_beta_pruning(maximize)
         else:
             (score, move, avg_depth) = self.minimax(maximize)
-        elapsed_seconds = (datetime.now() - start_time).total_seconds()
-        self.stats.total_seconds += elapsed_seconds
+        self.time(start_time)
         print(f"Heuristic score: {score}")
         print(f"Average recursive depth: {avg_depth:0.1f}")
         print(f"Evals per depth: ",end='')
