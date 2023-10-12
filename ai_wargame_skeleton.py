@@ -576,15 +576,19 @@ class Game:
         else:
             return (0, None, 0)
 
-    def minimax(self, maximize):
+    def elapsed_time(self,time_occured)-> bool:
+        return (time_occured + datetime.now().second) > self.options.max_time
+            
+    def minimax(self, maximize,current_time):
         """ Minimizing for defender and maximizing for attacker meaning
         Attacker wins: positive score
         Defender wins: negative score
         Tie: score of 0
         
         value is initiallized to its worst case. When mazimizing, set it to a large negative number and vice versa"""
+        time_up = self.elapsed_time(current_time)
         value = MAX_HEURISTIC_SCORE
-        if maximize:
+        if maximize :
             value = MIN_HEURISTIC_SCORE
         start_time = datetime.now()
         self.time(start_time)
@@ -596,8 +600,8 @@ class Game:
         if result == Player.Defender:
             return -1, None, 0
         elif result == Player.Attacker:
-            return 1, None, 0
-        elif result == None:
+            return 1
+        elif time_up:
             return self.heuristic_zero()
 
         best_move = None
@@ -606,12 +610,12 @@ class Game:
         # depending on whether we are maximizing or minimizing
         for move in self.move_candidates():
             if maximize:
-                v = self.minimax(maximize=False)
+                v = self.minimax(False,current_time)
                 if v > value:
                     value = v
                     best_move = move
             else:
-                v = self.minimax(maximize=True)
+                v = self.minimax(True,current_time)
                 if v < value:
                     value = v
                     best_move = move
@@ -628,13 +632,13 @@ class Game:
 
     def suggest_move(self) -> CoordPair | None:
         """Suggest the next move using minimax alpha beta. TODO: REPLACE RANDOM_MOVE WITH PROPER GAME LOGIC!!!"""
-        start_time = datetime.now()
+        start_time = datetime.now().second
         maximize = (self.next_player is Player.Attacker)
     
         if self.options.alpha_beta:
-            (score, move, avg_depth) = self.alpha_beta_pruning(maximize)
+            (score, move, avg_depth) = self.alpha_beta_pruning(maximize,start_time)
         else:
-            (score, move, avg_depth) = self.minimax(maximize)
+            (score, move, avg_depth) = self.minimax(maximize,start_time)
         self.time(start_time)
         print(f"Heuristic score: {score}")
         print(f"Average recursive depth: {avg_depth:0.1f}")
