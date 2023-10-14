@@ -252,6 +252,9 @@ class Stats:
     total_seconds: float = 0.0
 
 ##############################################################################################################
+class StopRecursion(Exception):
+    pass
+
 
 @dataclass(slots=True)
 class Game:
@@ -263,8 +266,9 @@ class Game:
     stats: Stats = field(default_factory=Stats)
     _attacker_has_ai : bool = True
     _defender_has_ai : bool = True
-
-
+    best_move = None
+    value = None
+    depth = None
     
     def create_file(self,b,t,m) -> str:
         b = str(b)
@@ -576,62 +580,76 @@ class Game:
         else:
             return (0, None, 0)
 
-    def elapsed_time(self,time_occured)-> bool:
-        return (time_occured + datetime.now().second) > self.options.max_time
-            
-    def minimax(self, maximize,current_time):
+    def is_time_up(self, start_time)-> bool: #THIS WORKS
+        current_time = (datetime.now() - start_time).total_seconds()
+        return current_time >= self.options.max_time
+        
+
+    
+    def minimax(self, maximize, start_time, coord, depth, game_clone):
         """ Minimizing for defender and maximizing for attacker meaning
         Attacker wins: positive score
         Defender wins: negative score
         Tie: score of 0
-        
-        value is initiallized to its worst case. When mazimizing, set it to a large negative number and vice versa"""
-        time_up = self.elapsed_time(current_time)
+        """
+        #value is initiallized to its worst case. When mazimizing, set it to a large negative number and vice versa
         value = MAX_HEURISTIC_SCORE
         if maximize :
             value = MIN_HEURISTIC_SCORE
-    
         result = self.has_winner()
-        # return the winner value or the heuristic 
-        if result == Player.Defender:
-            return -1
+        """return the winner value or the heuristic 
+        iff result == Player.Defender:
+            return -1, coordinates, depth
         elif result == Player.Attacker:
-            return 1
-        elif time_up:
-            return self.heuristic_zero()
-
+            return 1, coordinates, depth"""
+        # if you are the winner or when time is up, break
+        time_up = game_clone.is_time_up(start_time)
+        if time_up or depth == 1 or game_clone.next_player is result:  # Check if time is up
+            return game_clone.heuristic_zero(), coord, depth
+        
         best_move = None
-
         # evaluate all possible children states and pick the optimal one
         # depending on whether we are maximizing or minimizing
-        for move in self.move_candidates():
+        for move in game_clone.move_candidates():
+            if depth >= 1:
+                break
+            if game_clone.is_time_up(start_time):
+                break
+            depth += 1
+            game_clone.perform_move(move)
+            (v, _, _) = game_clone.minimax(not maximize, start_time, move, depth, game_clone)
+
             if maximize:
-                v = self.minimax(False,current_time)
                 if v > value:
                     value = v
                     best_move = move
             else:
-                v = self.minimax(True,current_time)
                 if v < value:
                     value = v
                     best_move = move
-
-        return value, best_move, 0
+        
+        return value, best_move, depth
+    #need to deal with depth
 
 
     def alpha_beta_pruning(self, maximize):
         return True
 
+  
+
     def suggest_move(self) -> CoordPair | None:
         """Suggest the next move using minimax alpha beta. TODO: REPLACE RANDOM_MOVE WITH PROPER GAME LOGIC!!!"""
-        start_time = datetime.now().second
+        start_time = datetime.now()
         maximize = (self.next_player is Player.Attacker)
-    
+        game_clone = self.clone()
         if self.options.alpha_beta:
-            (score, move, avg_depth) = self.alpha_beta_pruning(maximize,start_time)
+            (score, move, avg_depth) = self.alpha_beta_pruning(maximize, start_time, None, depth = 0)
         else:
-            (score, move, avg_depth) = self.minimax(maximize,start_time)
-        elapsed_seconds = (datetime.now() - start_time).second
+            (score, move, avg_depth) = self.minimax(maximize, start_time, None, 0, game_clone)
+            
+                
+
+        elapsed_seconds = (datetime.now() - start_time).total_seconds()
         self.stats.total_seconds += elapsed_seconds
         print(f"Heuristic score: {score}")
         print(f"Average recursive depth: {avg_depth:0.1f}")
