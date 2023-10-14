@@ -584,8 +584,8 @@ class Game:
         current_time = (datetime.now() - start_time).total_seconds()
         return current_time >= self.options.max_time
         
- 
 
+    
     def minimax(self, maximize, start_time, coord, depth, game_clone):
         """ Minimizing for defender and maximizing for attacker meaning
         Attacker wins: positive score
@@ -611,6 +611,8 @@ class Game:
         # evaluate all possible children states and pick the optimal one
         # depending on whether we are maximizing or minimizing
         for move in game_clone.move_candidates():
+            if depth >= 1:
+                break
             if game_clone.is_time_up(start_time):
                 break
             depth += 1
