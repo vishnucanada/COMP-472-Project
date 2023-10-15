@@ -370,7 +370,9 @@ class Game:
             return False
         if unit_dst is not None and unit_dst is unit_src:
             return True
-
+        if unit_dst is not None and unit_dst.health >= 9:
+            #You cant repair if youre above 9
+            return False
         if unit_src.type._value_ in [0, 3, 4]: 
             #Entity of either type AI, firewall or program 
             
@@ -422,7 +424,7 @@ class Game:
         if self.is_valid_move(coords):
             unit_src = self.get(coords.src)
             unit_dst = self.get(coords.dst)
-            if unit_dst != None and coords.dst != coords.src and unit_src.player == unit_dst.player:
+            if unit_dst != None and coords.dst != coords.src and unit_src.player == unit_dst.player and unit_dst.health > 9:
                 health_delta = unit_src.repair_amount(unit_dst)
                 unit_dst.mod_health(health_delta)
 
@@ -431,7 +433,7 @@ class Game:
                 unit_dst.mod_health(health_delta)
                 health_delta = unit_dst.damage_amount(unit_src)
                 unit_src.mod_health(health_delta)
-            elif unit_dst != None and unit_src.player == unit_dst.player: #Self destruction
+            elif unit_dst != None and unit_src.player == unit_dst.player and unit_src == unit_dst: #Self destruction
                 for coord in coords.src.iter_range(1):  # Adjust the range as needed
                     unit = self.get(coord)
                     if unit is not None:
@@ -583,10 +585,42 @@ class Game:
     def is_time_up(self, start_time)-> bool: #THIS WORKS
         current_time = (datetime.now() - start_time).total_seconds()
         return current_time >= self.options.max_time
-        
-
     
-    def minimax(self, maximize, start_time, coord, depth, game_clone):
+    def minimax(self,maximize, start_time, move, depth, game_clone: Game) -> Tuple[int,CoordPair,int]:
+        chosen_move = move
+        if depth == 0 or game_clone.is_time_up(start_time) or game_clone.has_winner():
+            return (game_clone.heuristic_zero(),chosen_move, depth)
+
+        if maximize:
+            max_evaluation = MIN_HEURISTIC_SCORE
+            for move_to_see in game_clone.move_candidates():
+                if game_clone.is_time_up(start_time):
+                    break
+                (valid_move, _) = game_clone.perform_move(move_to_see)
+                if valid_move:
+                    (heuristic_score,_,_ ) = game_clone.minimax(False, start_time, move_to_see, depth - 1, game_clone)
+                    if heuristic_score > max_evaluation:
+                        max_evaluation = heuristic_score
+                        chosen_move = move_to_see
+
+               
+            return (max_evaluation, chosen_move, depth)
+        else:
+            min_evaluation = MAX_HEURISTIC_SCORE
+            
+            for move_to_see in game_clone.move_candidates():
+                if game_clone.is_time_up(start_time):
+                    break
+                (valid_move, _) = game_clone.perform_move(move_to_see)
+                if valid_move:
+                    (heuristic_score,_,_ )= game_clone.minimax(True, start_time, move_to_see, depth - 1, game_clone)
+                    if -heuristic_score < min_evaluation:
+                        min_evaluation = -heuristic_score
+                        chosen_move = move_to_see
+
+            return (min_evaluation, chosen_move, depth)
+
+    def minimax1(self, maximize, start_time, coord, depth, game_clone):
         """ Minimizing for defender and maximizing for attacker meaning
         Attacker wins: positive score
         Defender wins: negative score
@@ -597,14 +631,10 @@ class Game:
         if maximize :
             value = MIN_HEURISTIC_SCORE
         result = self.has_winner()
-        """return the winner value or the heuristic 
-        iff result == Player.Defender:
-            return -1, coordinates, depth
-        elif result == Player.Attacker:
-            return 1, coordinates, depth"""
+        
         # if you are the winner or when time is up, break
         time_up = game_clone.is_time_up(start_time)
-        if time_up or depth == 1 or game_clone.next_player is result:  # Check if time is up
+        if time_up or depth == 5 or game_clone.next_player is result:  # Check if time is up
             return game_clone.heuristic_zero(), coord, depth
         
         best_move = None
@@ -645,7 +675,7 @@ class Game:
         if self.options.alpha_beta:
             (score, move, avg_depth) = self.alpha_beta_pruning(maximize, start_time, None, depth = 0)
         else:
-            (score, move, avg_depth) = self.minimax(maximize, start_time, None, 0, game_clone)
+            (score, move, avg_depth) = self.minimax(maximize, start_time, None, 3, game_clone)
             
                 
 
@@ -661,6 +691,7 @@ class Game:
         if self.stats.total_seconds > 0:
             print(f"Eval perf.: {total_evals/self.stats.total_seconds/1000:0.1f}k/s")
         print(f"Elapsed time: {elapsed_seconds:0.1f}s")
+        print("Computer played move "+str(move))
         return move
 
     def post_move_to_broker(self, move: CoordPair):
@@ -724,25 +755,33 @@ class Game:
                     heuristic_value += unit.e0_evaluation_amount()
         return heuristic_value
     
+    def fastest_heurisic_you_ever_seen(self):
+        count_number_valid_moves = 0
+        for coord_pair in self.move_candidates():
+            count_number_valid_moves += self.number_of_valid_moves_but_faster(coord_pair)
+        return count_number_valid_moves
+
+        
     def number_of_valid_moves_but_faster(self,coords: CoordPair) -> int:
         """
         This is a faster way to check number of valid moves, because it does not account for attacks and repairs,
         only for probable positions to move too
         """
-
-        coord_row = coords.src.row
-        coord_col = coords.src.col
-        array_of_valid_moves = [self.is_valid_coord(Coord(coord_row,coord_col-1)), self.is_valid_coord(Coord(coord_row-1,coord_col)),self.is_valid_coord(Coord(coord_row+1,coord_col)),self.is_valid_coord(Coord(coord_row,coord_col+1))] 
-        return sum(array_of_valid_moves)
-
+        if coords.dst is None:
+            coord_row = coords.src.row
+            coord_col = coords.src.col        
+            array_of_valid_moves = [self.is_valid_coord(Coord(coord_row,coord_col-1)), self.is_valid_coord(Coord(coord_row-1,coord_col)),self.is_valid_coord(Coord(coord_row+1,coord_col)),self.is_valid_coord(Coord(coord_row,coord_col+1))] 
+            
+            return sum(array_of_valid_moves)
+        return 0
     def number_of_valid_moves(self,coords : CoordPair) -> int:
         """
         For one of the heuristics, We want to know how many legal moves are possible, which also equates to position
         """
         #Up down left right, so it will only run a max of 4 times
         valid_moves = 0
-        iteratable_coords = list(coords.src.iter_adjacent())
-        for coordinate_to_move in iteratable_coords:
+        #iteratable_coords = list(coords.src.iter_adjacent())
+        for coordinate_to_move in coords.src.iter_adjacent():
             if self.is_valid_move(coordinate_to_move) :
                 valid_moves = valid_moves + 1
         return valid_moves
