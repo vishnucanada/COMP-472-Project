@@ -1,4 +1,3 @@
-
 from __future__ import annotations
 import argparse
 import copy
@@ -500,8 +499,8 @@ class Game:
             while True:
                 mv = self.get_move_from_broker()
                 if mv is not None:
-                    (success,result) = self.perform_move(mv)
-                    print(f"Broker {self.next_player.name}: ",end='')
+                    (success, result) = self.perform_move(mv)
+                    print(f"Broker {self.next_player.name}: ", end='')
                     print(result)
                     if success:
                         self.next_turn()
@@ -510,14 +509,16 @@ class Game:
         else:
             while True:
                 mv = self.read_move()
-                (success,result) = self.perform_move(mv)
+                (success, result) = self.perform_move(mv)
                 if success:
-                    print(f"Player {self.next_player.name}: ",end='')
+                    print(f"Player {self.next_player.name}: ", end='')
                     print(result)
                     self.next_turn()
                     break
                 else:
                     print("The move is not valid! Try again.")
+                    # Do not penalize the user for an invalid move. Allow them to try again.
+
 
     def computer_turn(self) -> CoordPair | None:
         """Computer plays a move."""
@@ -642,6 +643,44 @@ class Game:
             print(f"Broker error: {error}")
         return None
         
+    def minimax(self, depth, alpha, beta, maximizing_player):
+        if depth == 0 or self.is_finished():
+            if self.next_player == Player.Attacker:
+                return self.heuristic_zero(), None
+            else:
+                # Choose the appropriate heuristic function for the Defender
+                return self.heuristic_one(), None  # or self.heuristic_two()
+
+        if maximizing_player:
+            max_eval = float('-inf')
+            best_move = None
+            for move in self.move_candidates():
+                self.perform_move(move)
+                eval, _ = self.minimax(depth - 1, alpha, beta, False)
+                self.undo_move(move)
+                if eval > max_eval:
+                    max_eval = eval
+                    best_move = move
+                alpha = max(alpha, eval)
+                if beta <= alpha:
+                    break
+            return max_eval, best_move
+        else:
+            min_eval = float('inf')
+            best_move = None
+            for move in self.move_candidates():
+                self.perform_move(move)
+                eval, _ = self.minimax(depth - 1, alpha, beta, True)
+                self.undo_move(move)
+                if eval < min_eval:
+                    min_eval = eval
+                    best_move = move
+                beta = min(beta, eval)
+                if beta <= alpha:
+                    break
+            return min_eval, best_move
+
+
     def heuristic_zero(self):
         heuristic_value = 0
         for coord in CoordPair.from_dim(self.options.dim).iter_rectangle():
@@ -653,7 +692,30 @@ class Game:
                     heuristic_value = heuristic_value + unit.e0_evaluation_amount
         return heuristic_value
 
+    def heuristic_one(self):
+        heuristic_value = 0
+        for coord in CoordPair.from_dim(self.options.dim).iter_rectangle():
+            unit = self.get(coord)
+            if unit is not None:
+                if unit.player == Player.Defender:
+                    heuristic_value = heuristic_value - unit.e1_evaluation_amount
+                else:
+                    heuristic_value = heuristic_value + unit.e1_evaluation_amount
+        return heuristic_value
     
+    def heuristic_two(self):
+        heuristic_value = 0
+        for coord in CoordPair.from_dim(self.options.dim).iter_rectangle():
+            unit = self.get(coord)
+            if unit is not None:
+                if unit.player == Player.Defender:
+                    heuristic_value = heuristic_value - unit.e2_evaluation_amount
+                else:
+                    heuristic_value = heuristic_value + unit.e2_evaluation_amount
+        return heuristic_value
+    
+
+
     
 ##############################################################################################################
 
@@ -664,7 +726,7 @@ def main():
     max_time = int(input("Please enter a maximum amount(in seconds) that AI is allowed to take: "))
 
     game_mode = str(input("Please enter a specified game mode \n Modes \n attacker \n defender \n manual \n computer \n"))
-    
+
     parser = argparse.ArgumentParser(
         prog='ai_wargame',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -698,7 +760,6 @@ def main():
     if args.broker is not None:
         options.broker = args.broker
 
-
     # create a new game
     game = Game(options=options)
 
@@ -707,7 +768,7 @@ def main():
     t = options.max_time
     m = options.max_turns
     
-    file_name = game.create_file(b,t,m)
+    file_name = game.create_file(b, t, m)
     # the main game loop
     while True:
         print()
@@ -733,7 +794,11 @@ def main():
                 print("Computer doesn't know what to do!!!")
                 exit(1)
 
-##############################################################################################################
+    # Display statistics after the game is finished
+    print("\nGame Statistics:")
+    print(f"Total evaluations per depth: {game.stats.evaluations_per_depth}")
+    print(f"Total time taken: {game.stats.total_seconds:.2f} seconds")
+    print(f"Avg time per move: {game.stats.total_seconds / game.turns_played:.2f} seconds")
 
 if __name__ == '__main__':
     main()
