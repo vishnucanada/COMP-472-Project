@@ -387,7 +387,12 @@ class Game:
             #If current player is not using its entity (source)
             return False
         if unit_dst is not None and unit_dst is unit_src:
-            return True
+            #self-destruct only when there is your oponent around yourself
+            for coord in coords.src.iter_range(1):  
+                    unit = self.get(coord)
+                    if unit is not None and unit.player is not self.next_player:
+                        return True  
+
         if unit_dst is not None and unit_dst.health >= 9:
             #You cant repair if youre above 9
             return False
@@ -646,7 +651,43 @@ class Game:
                         chosen_move = move_to_observe
 
         return (evaluation, parent_node.move, depth)
-            
+
+
+    def minimax_round_four(self,  maximize, start_time, move, depth, game_clone : Game, parent_node: Node) :#-> Tuple[int,CoordPair,int]:
+        if depth == 0 or game_clone.is_time_up(start_time) or game_clone.has_winner():
+            return (game_clone.heuristic_zero(), move, depth)
+        print(game_clone)
+        evaluation = MIN_HEURISTIC_SCORE if maximize else MAX_HEURISTIC_SCORE
+        chosen_move = None
+        # evaluate all possible children states and pick the optimal one
+        # depending on whether we are maximizing or minimizing
+        for possible_move in game_clone.move_candidates():
+            if game_clone.is_time_up(start_time) or game_clone.has_winner() is not None:
+                break
+            (valid_move, _) = game_clone.perform_move(possible_move)
+            if valid_move:
+                if parent_node is None:
+                    current_node = Node(None,game_clone, possible_move)
+                else:
+                    current_node = Node(parent_node, game_clone, possible_move)
+                
+                (heuristic_score,_,_ ) = game_clone.minimax_round_four(not maximize, start_time, possible_move, depth - 1, game_clone , current_node)
+                
+                if maximize:
+                    if heuristic_score > evaluation:
+                        evaluation = heuristic_score
+                        chosen_move = possible_move
+                else:
+                    if heuristic_score < evaluation:
+                        evaluation = heuristic_score
+                        chosen_move = possible_move
+        return (evaluation, chosen_move, depth)
+        
+
+        
+   
+   
+   
     def minimax(self,maximize, start_time, move, depth, game_clone: Game) -> Tuple[int,CoordPair,int]:
         chosen_move = move
         if depth == 0 or game_clone.is_time_up(start_time) or game_clone.has_winner() is not None:
@@ -740,7 +781,7 @@ class Game:
         if self.options.alpha_beta:
             (score, move, avg_depth) = self.alpha_beta_pruning(maximize, start_time, None, depth = 0)
         else:
-            (score, move, avg_depth) = self.minimax_round_three(maximize, start_time, None, 3, game_clone,None)
+            (score, move, avg_depth) = self.minimax_round_four(maximize, start_time, None, 3, game_clone,None)
             
                 
 
