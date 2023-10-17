@@ -404,8 +404,7 @@ class Game:
                 for coord in coords.src.iter_adjacent():
                     adjacent_coord = self.get(coord)
                     if adjacent_coord != None and unit_src.player != adjacent_coord.player: 
-                        #Check if the adjacent unit is an adversarial unit
-                        print("You are currently engaged in combat. Select another entity to move.")
+                        #Check if the adjacent unit is an adversarial unit. If true, engaged in combat so you cannot move
                         return False
                         
                 if unit_src.player._value_ == Player.Attacker._value_: #Player: Attacker
@@ -653,7 +652,7 @@ class Game:
         return (evaluation, parent_node.move, depth)
 
 
-    def minimax_round_four(self,  maximize, start_time, move, depth, game_clone : Game, parent_node: Node) :#-> Tuple[int,CoordPair,int]:
+    def minimax_round_four(self, maximize, start_time, move, depth, game_clone : Game, parent_node: Node) :#-> Tuple[int,CoordPair,int]:
         if depth == 0 or game_clone.is_time_up(start_time) or game_clone.has_winner():
             return (game_clone.heuristic_zero(), move, depth)
         print(game_clone)
@@ -671,13 +670,15 @@ class Game:
                 else:
                     current_node = Node(parent_node, game_clone, possible_move)
                 
-                (heuristic_score,_,_ ) = game_clone.minimax_round_four(not maximize, start_time, possible_move, depth - 1, game_clone , current_node)
-                
                 if maximize:
+                    game_clone.next_player = Player.Defender
+                    (heuristic_score,_,_ ) = game_clone.minimax_round_four(False, start_time, possible_move, depth - 1, game_clone, current_node)
                     if heuristic_score > evaluation:
                         evaluation = heuristic_score
                         chosen_move = possible_move
                 else:
+                    game_clone.next_player = Player.Attacker
+                    (heuristic_score,_,_ ) = game_clone.minimax_round_four(True, start_time, possible_move, depth - 1, game_clone, current_node)
                     if heuristic_score < evaluation:
                         evaluation = heuristic_score
                         chosen_move = possible_move
