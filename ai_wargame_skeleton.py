@@ -252,6 +252,27 @@ class Stats:
 
 ##############################################################################################################
 
+class NodeLL:
+    def __init__(self, data: CoordPair, game_clone: Game, next) -> None:
+        self.data = data
+        self.game_clone = game_clone
+        self.next = None
+    
+
+class LinkedList:
+    parent: Node
+    
+    
+    def __init__(self ,parent) -> None:
+        self.parent = parent
+
+    def add_node(self, move : CoordPair, game_clone):
+        if parent is None:
+            parent = NodeLL(move, game_clone,None)
+        else:
+            new_node = NodeLL(move, game_clone, parent)
+            parent = new_node
+
 
 class Node:
         parent: Node
@@ -595,14 +616,14 @@ class Game:
             move.dst = src
             yield move.clone()
 
-    def random_move(self) -> Tuple[int, CoordPair | None, float]:
+    def random_move(self) -> CoordPair]:
         """Returns a random move."""
         move_candidates = list(self.move_candidates())
-        random.shuffle(move_candidates)
+        random.shuffle(move_candidates)[0]
         if len(move_candidates) > 0:
-            return (0, move_candidates[0], 1)
+            return (move_candidates[0])
         else:
-            return (0, None, 0)
+            return (None)
 
     def is_time_up(self, start_time)-> bool: #THIS WORKS
         current_time = (datetime.now() - start_time).total_seconds()
@@ -652,46 +673,49 @@ class Game:
         return (evaluation, parent_node.move, depth)
 
 
-    def minimax_round_four(self, maximize, start_time, move, depth, game_clone : Game, parent_node: Node) :#-> Tuple[int,CoordPair,int]:
-        if depth == 0 or game_clone.is_time_up(start_time) or game_clone.has_winner():
+    def minimax_round_four(self, maximize, start_time, move, depth, max_depth, game_clone : Game, trace: LinkedList) :#-> Tuple[int,CoordPair,int]:
+        if depth == max_depth or game_clone.is_time_up(start_time) or game_clone.has_winner():
             return (game_clone.heuristic_zero(), move, depth)
         print(game_clone)
+
         evaluation = MIN_HEURISTIC_SCORE if maximize else MAX_HEURISTIC_SCORE
         chosen_move = None
         # evaluate all possible children states and pick the optimal one
         # depending on whether we are maximizing or minimizing
-        for possible_move in game_clone.move_candidates():
-            if game_clone.is_time_up(start_time) or game_clone.has_winner() is not None:
-                break
-            (valid_move, _) = game_clone.perform_move(possible_move)
-            if valid_move:
-                if parent_node is None:
-                    current_node = Node(None,game_clone, possible_move)
-                else:
-                    current_node = Node(parent_node, game_clone, possible_move)
-                
-                if maximize:
-                    game_clone.next_player = Player.Defender
-                    (heuristic_score,_,_ ) = game_clone.minimax_round_four(False, start_time, possible_move, depth - 1, game_clone, current_node)
-                    if heuristic_score > evaluation:
-                        evaluation = heuristic_score
-                        chosen_move = possible_move
-                else:
-                    game_clone.next_player = Player.Attacker
-                    (heuristic_score,_,_ ) = game_clone.minimax_round_four(True, start_time, possible_move, depth - 1, game_clone, current_node)
-                    if heuristic_score < evaluation:
-                        evaluation = heuristic_score
-                        chosen_move = possible_move
-        return (evaluation, chosen_move, depth)
         
+        #if game_clone.is_time_up(start_time) or game_clone.has_winner() is not None:
+         #   break
+        
+
+        permutation_indices = torch.randperm(n)
+
+        # Use the permutation indices to access elements in the desired order
+        permuted_list = [my_list[i] for i in permutation_indices]
+
+        for move in game_clone.move_candidates():
+            
+            node_to_add = NodeLL(game_clone, move)
+            trace = LinkedList(node_to_add)
+            game_clone.perform_move(move)
+
+            
+            
+                
+
+       
+        game_clone.generate_tree()
+
+
+
+
 
         
    
    
-   
-    def minimax(self,maximize, start_time, move, depth, game_clone: Game) -> Tuple[int,CoordPair,int]:
+    def minimax(self,maximize, start_time, move, game_clone: Game) -> Tuple[int,CoordPair,int]:
         chosen_move = move
-        if depth == 0 or game_clone.is_time_up(start_time) or game_clone.has_winner() is not None:
+        
+        if depth == max_depth or game_clone.is_time_up(start_time) or game_clone.has_winner() is not None:
             return (game_clone.heuristic_zero(),chosen_move, depth)
         value = MAX_HEURISTIC_SCORE if maximize else MIN_HEURISTIC_SCORE
         
@@ -780,9 +804,9 @@ class Game:
         maximize = (self.next_player is Player.Attacker)
         game_clone = self.clone()
         if self.options.alpha_beta:
-            (score, move, avg_depth) = self.alpha_beta_pruning(maximize, start_time, None, depth = 0)
+            (score, move, avg_depth) = self.alpha_beta_pruning(maximize, start_time, None, depth = 0, max_depth = 3)
         else:
-            (score, move, avg_depth) = self.minimax_round_four(maximize, start_time, None, 3, game_clone,None)
+            (score, move, avg_depth) = self.minimax_round_four(maximize, start_time, None, game_clone,None, depth = 0, max_depth = 3)
             
                 
 
