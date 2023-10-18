@@ -559,6 +559,14 @@ class Game:
                 print(result)
                 
                 self.next_turn()
+            else:
+                print(f"Computer has performed a INVALID MOVE")
+                if self.next_player == Player.Attacker:
+                    self._attacker_has_ai = False
+                else:
+                    self._defender_has_ai = False
+
+                self.has_winner()
         return mv
 
     def player_units(self, player: Player) -> Iterable[Tuple[Coord,Unit]]:
@@ -655,7 +663,7 @@ class Game:
     def minimax_round_four(self, maximize, start_time, move, depth, game_clone : Game, parent_node: Node) :#-> Tuple[int,CoordPair,int]:
         if depth == 0 or game_clone.is_time_up(start_time) or game_clone.has_winner():
             return (game_clone.heuristic_zero(), move, depth)
-        print(game_clone)
+        #print(game_clone)
         evaluation = MIN_HEURISTIC_SCORE if maximize else MAX_HEURISTIC_SCORE
         chosen_move = None
         # evaluate all possible children states and pick the optimal one
