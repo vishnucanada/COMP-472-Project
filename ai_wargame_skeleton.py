@@ -413,11 +413,11 @@ class Game:
                     if unit is not None and unit.player is not self.next_player:
                         return True  
 
-        if unit_dst is not None and unit_dst.health >= 9:
+        if unit_dst is not None and unit_dst.health >= 9 and unit_dst.player == unit_src.player:
             #You cant repair if youre above 9
             return False
         if unit_src.type._value_ in [0, 3, 4]: 
-            #Entity of either type AI, firewall or program 
+            #Entity of either type AI, program or firewall
             
             if unit_dst is None: 
                 #Check when player wants to move to an empty spot
@@ -651,7 +651,7 @@ class Game:
         
     def minimax(self, maximize, start_time, depth, move, game_clone : Game, node : LinkedList, best_move_pq: PriorityQueue)-> Tuple[int, CoordPair, int]:
         
-        if (depth > 4 or game_clone.is_time_up(start_time) or game_clone.has_winner()):
+        if (depth > 10 or game_clone.is_time_up(start_time) or game_clone.has_winner()):
             score = game_clone.heuristic_zero()
             node.set_score(score)
             return (score, move, depth)
