@@ -272,8 +272,7 @@ class NodeLL:
     """
 
 class LinkedList:
-    current: NodeLL
-    
+   
     def __init__(self, current) -> None:
         self.current = current
 
@@ -282,6 +281,7 @@ class LinkedList:
             self.current = NodeLL(move, game_clone)
         else:
             self.current.next = NodeLL(move, game_clone)
+        return self.current
 
     def set_score(self, score):
         if self.current:
@@ -657,10 +657,12 @@ class Game:
             for move in game_clone.potential_move():
                 (valid_move, _) = game_clone.perform_move(move)
                 if valid_move:
-                    node_to_add = NodeLL(move, game_clone)
-                    trace = LinkedList(node_to_add)
+                    added_node = node.add_node(move, game_clone)
+                    
+
+                    
                     game_clone.next_turn()
-                    (new_score, chosen_move, depth) = game_clone.minimax(not maximize, start_time, depth + 1, move, game_clone, trace, best_move_score)
+                    (new_score, chosen_move, depth) = game_clone.minimax(not maximize, start_time, depth + 1, move, game_clone, added_node, best_move_score)
 
                     if best_move_score < new_score:
                         print(node.get_score())
@@ -672,10 +674,12 @@ class Game:
             for move in game_clone.potential_move():
                 (valid_move, _) = game_clone.perform_move(move)
                 if valid_move:
-                    node_to_add = NodeLL(move, game_clone)
-                    trace = LinkedList(node_to_add)
+                    
+                    added_node = node.add_node(move, game_clone)
+                    
+                   
                     game_clone.next_turn()
-                    (new_score, chosen_move, depth) = game_clone.minimax(not maximize, start_time, depth + 1, move, game_clone, trace, best_move_score)
+                    (new_score, chosen_move, depth) = game_clone.minimax(not maximize, start_time, depth + 1, move, game_clone, added_node, best_move_score)
 
                     if best_move_score > new_score:
                         node.set_score(new_score)
