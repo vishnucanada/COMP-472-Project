@@ -632,114 +632,87 @@ class Game:
     def potential_move(self) -> Iterable[CoordPair]:
         """Generate valid move candidates for the next player."""
         #Still need to work on this! will have to remove the while loop and add the commented section!
-        
+        no_valid_move = True
         player_src = []
-        move = CoordPair()
         for (src,_) in self.player_units(self.next_player):
-            #player_src.append(src)
-        #for (src,_) in random.choice(player_src):
+            player_src.append(src)
+        while(no_valid_move):
+            src = random.choice(player_src)
             # Iterate through all adjacent coordinates and yield valid moves
             for dst in src.iter_adjacent():
                 move = CoordPair(src, dst)  # Create a CoordPair with the chosen source and adjacent destination
                 if self.is_valid_move(move):
+                    no_valid_move = False
                     yield move
-            move.dst = src
-            yield move
+
+
+    def find_best_tree(self, maximize, start_time, game_clone : Game)-> Tuple[int, CoordPair, int]:
+        player_src = []
+        valid_move = None
+        best_move = None
+        best_move_score = MIN_HEURISTIC_SCORE if maximize else MAX_HEURISTIC_SCORE
+        for (src,_) in self.player_units(self.next_player):
+                player_src.append(src)
+        random.shuffle(player_src)
+        for src in player_src:
+            if game_clone.is_time_up(start_time):
+                break
+            for dst in src.iter_adjacent():
+                move = CoordPair(src, dst)  # Create a CoordPair with the chosen source and adjacent destination
+                if self.is_valid_move(move):
+                    valid_move = move
+                    break
+            if valid_move is not None:
+                break
+        (new_score, first_move, depth) = game_clone.minimax(maximize, start_time, 0, valid_move, game_clone, None, None)
+        if maximize and best_move_score < new_score:
+            best_move = first_move
+            best_move_score = new_score
+        elif not maximize and best_move_score > new_score:
+            best_move = first_move
+            best_move_score = new_score
         
-    def minimax(self, maximize, start_time, depth, move, game_clone : Game, node : LinkedList, best_move_score : int)-> Tuple[int, CoordPair, int]:
+        if best_move is None and best_move_score is None:
+            best_move = game_clone.random_move()
+            best_move_score = game_clone.heuristic_zero()
+
+        return best_move_score, best_move, depth
+
+
+
+        
+    def minimax(self, maximize, start_time, depth, make_move, game_clone : Game, node : LinkedList, best_move_score : int)-> Tuple[int, CoordPair, int]:
         print(game_clone)
-        if (depth > 2 or game_clone.is_time_up(start_time) or game_clone.has_winner()):
+        if (depth > 4 or game_clone.is_time_up(start_time) or game_clone.has_winner()):
             score = game_clone.heuristic_zero()
             node.set_score(score)
-            return (score, move, depth)
+            return (score, make_move, depth)
         best_move_score = MIN_HEURISTIC_SCORE if maximize else MAX_HEURISTIC_SCORE
-        for move in game_clone.move_candidates():
-            if maximize:
-                #for move in game_clone.move_candidates():
-                    (valid_move, _) = game_clone.perform_move(move)
-                    if valid_move:
-                        if node is None:
-                            temp_node = NodeLL(move, game_clone)
-                            trace = LinkedList(temp_node)
-                        else:
-
-                            added_node = node.add_node(move, game_clone)
-                            trace = LinkedList(added_node)
-
-                        
-                        game_clone.next_turn()
-                        (new_score, chosen_move, depth) = game_clone.minimax(not maximize, start_time, depth + 1, move, game_clone, trace, best_move_score)
-
-                        if best_move_score < new_score:
-                            node.set_score(new_score)
-                            best_move_score = new_score
-                            #best_move_pq.put((new_score, chosen_move))
+        
+        
+        game_clone.perform_move(make_move)
+        if node is None:
+                temp_node = NodeLL(make_move, game_clone)
+                trace = LinkedList(temp_node)
+        else:
+            added_node = node.add_node(make_move, game_clone)
+            trace = LinkedList(added_node)
+        game_clone.next_turn()
+        for move in game_clone.potential_move():
+            (new_score, chosen_move, depth) = game_clone.minimax(not maximize, start_time, depth + 1, move, game_clone, trace, best_move_score)
+            if maximize and best_move_score < new_score:
+                node.set_score(new_score)
+                best_move_score = new_score
+                #best_move_pq.put((new_score, chosen_move))
                     
-            else:
-                #for move in game_clone.move_candidates():
-                    (valid_move, _) = game_clone.perform_move(move)
-                    if valid_move:
-                        added_node = node.add_node(move, game_clone)
-                        trace = LinkedList(added_node)
-                    
-                        game_clone.next_turn()
-                        (new_score, chosen_move, depth) = game_clone.minimax(not maximize, start_time, depth + 1, move, game_clone, trace, best_move_score)
+            elif not maximize and best_move_score > new_score:
+                node.set_score(new_score)
+                best_move_score = new_score
 
-                        if best_move_score > new_score:
-                            node.set_score(new_score)
-                            best_move_score = new_score
-
-        return best_move_score, move, depth
+        return best_move_score, make_move, depth
 
     
-    def minimax1(self, maximize=False):
-        # Minimizing for 'X' and maximizing for 'O'
-        # Possible values are:
-        # -1 - win for 'X'
-        # 0  - a tie
-        # 1  - loss for 'X'
-        # We're initially setting it to 2 or -2 as worse than the worst case:
-        value = 2
-        if maximize:
-            value = -2
-        x = None
-        y = None
-        result = self.is_end()
-        if result == 'X':
-            return (-1, x, y)
-        elif result == 'O':
-            return (1, x, y)
-        elif result == '.':
-            return (0, x, y)
-        # evaluate all possible children states and pick the optimal one
-        # depending on whether we are maximizing or minimizing
-        for i in range(0, 3):
-            for j in range(0, 3):
-                if self.current_state[i][j] == '.':
-                    if maximize:
-                        # create a child state
-                        self.current_state[i][j] = 'O'
-                        # evaluate it
-                        (v, _, _) = self.minimax(maximize=False)
-                        # keep its coordinates if best so far
-                        if v > value:
-                            value = v
-                            x = i
-                            y = j
-                    else:
-                        # create a child state
-                        self.current_state[i][j] = 'X'
-                        # evaluate it
-                        (v, _, _) = self.minimax(maximize=True)
-                        # keep its coordinates if best so far
-                        if v < value:
-                            value = v
-                            x = i
-                            y = j
-                    # undo the child state <---------
-                    self.current_state[i][j] = '.'
-        # return best coordinates and associated value
-        return (value, x, y)
+    
 
     def alpha_beta_pruning(self, maximize):
         return True
@@ -751,12 +724,13 @@ class Game:
         start_time = datetime.now()
         maximize = (self.next_player is Player.Attacker)
         game_clone = self.clone()
+        
         best_move_pq = PriorityQueue()
         best_move_pq.put((game_clone.heuristic_zero(), game_clone.random_move()))
         if self.options.alpha_beta:
             (score, move, avg_depth) = self.alpha_beta_pruning(maximize, start_time, None, depth = 0, max_depth = 3)
         else:
-            (score, move, avg_depth) = self.minimax(maximize, start_time, 0, None, game_clone, None, best_move_pq)
+            (score, move, avg_depth) = self.find_best_tree(maximize, start_time, game_clone)
             
                 
 
