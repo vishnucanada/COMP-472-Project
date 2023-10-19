@@ -653,37 +653,41 @@ class Game:
             node.set_score(score)
             return (score, move, depth)
         best_move_score = MIN_HEURISTIC_SCORE if maximize else MAX_HEURISTIC_SCORE
-        if maximize:
-            for move in game_clone.potential_move():
-                (valid_move, _) = game_clone.perform_move(move)
-                if valid_move:
-                    added_node = node.add_node(move, game_clone)
-                    
+        for move in game_clone.move_candidates():
+            if maximize:
+                #for move in game_clone.move_candidates():
+                    (valid_move, _) = game_clone.perform_move(move)
+                    if valid_move:
+                        if node is None:
+                            temp_node = NodeLL(move, game_clone)
+                            trace = LinkedList(temp_node)
+                        else:
 
-                    
-                    game_clone.next_turn()
-                    (new_score, chosen_move, depth) = game_clone.minimax(not maximize, start_time, depth + 1, move, game_clone, added_node, best_move_score)
+                            added_node = node.add_node(move, game_clone)
+                            trace = LinkedList(added_node)
 
-                    if best_move_score < new_score:
-                        print(node.get_score())
-                        node.set_score(new_score)
-                        best_move_score = new_score
-                        #best_move_pq.put((new_score, chosen_move))
-                   
-        else:
-            for move in game_clone.potential_move():
-                (valid_move, _) = game_clone.perform_move(move)
-                if valid_move:
-                    
-                    added_node = node.add_node(move, game_clone)
-                    
-                   
-                    game_clone.next_turn()
-                    (new_score, chosen_move, depth) = game_clone.minimax(not maximize, start_time, depth + 1, move, game_clone, added_node, best_move_score)
+                        
+                        game_clone.next_turn()
+                        (new_score, chosen_move, depth) = game_clone.minimax(not maximize, start_time, depth + 1, move, game_clone, trace, best_move_score)
 
-                    if best_move_score > new_score:
-                        node.set_score(new_score)
-                        best_move_score = new_score
+                        if best_move_score < new_score:
+                            node.set_score(new_score)
+                            best_move_score = new_score
+                            #best_move_pq.put((new_score, chosen_move))
+                    
+            else:
+                #for move in game_clone.move_candidates():
+                    (valid_move, _) = game_clone.perform_move(move)
+                    if valid_move:
+                        added_node = node.add_node(move, game_clone)
+                        trace = LinkedList(added_node)
+                    
+                        game_clone.next_turn()
+                        (new_score, chosen_move, depth) = game_clone.minimax(not maximize, start_time, depth + 1, move, game_clone, trace, best_move_score)
+
+                        if best_move_score > new_score:
+                            node.set_score(new_score)
+                            best_move_score = new_score
 
         return best_move_score, move, depth
 
