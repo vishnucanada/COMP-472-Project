@@ -252,7 +252,21 @@ class Stats:
     total_seconds: float = 0.0
 
 ##############################################################################################################
+class Tree:
+    move: CoordPair
+    game_clone: Game;
+    
+    def __init__(self, heuristic, move, game_clone, children=None):
+        self.heuristic = heuristic
+        self.move = move
+        self.game_clone = game_clone
+        self.children = children if children is not None else []
 
+    def add_child(self, child: Iterable[Tree]):
+        self.children.append(child)
+        
+   
+        
 class NodeLL:
     move: CoordPair
     game_clone: Game
@@ -284,9 +298,9 @@ class LinkedList:
         return self.current
 
     def set_score(self, score):
-        if self.current:
+        if self is not None and self.current:
             self.current.score = score
-
+  
     def get_score (self):
         if self.current:
             return self.current.score
@@ -644,9 +658,111 @@ class Game:
                 if self.is_valid_move(move):
                     no_valid_move = False
                     yield move
+    
+    ''''
+    class Tree:
+    move: CoordPair
+    game_clone: Game;
+    
+    def __init__(self, heuristic, move, game_clone, children=None):
+        self.heuristic = heuristic
+        self.move = move
+        self.game_clone = game_clone
+        self.children = children if children is not None else []
 
+    def add_child(self, child):
+        self.children.append(child)
+        
+   
+    '''
+    def find_tre2e(self, root, depth, max_depth, start_time)-> Tree:
+        game_clone = self.clone()
+        if depth == max_depth:
+            return root
+        root = Tree(game_clone.heuristic_zero(),game_clone.perform_move,game_clone, None)
+        possible_moves = list(game_clone.find_all_moves(start_time)) 
 
-    def find_best_tree(self, maximize, start_time, game_clone : Game)-> Tuple[int, CoordPair, int]:
+        for move in possible_moves:
+            game2 = game_clone.clone()
+            (valid,_) = game2.perform_move(move)
+            if valid:
+                child = self.find_tree(game_clone.perform_move(move),depth+1,max_depth,start_time)
+                
+                root.add_child(child)
+        return root
+    def find_tree(self, root, depth, max_depth, start_time) -> Tree:
+        if depth == max_depth:
+            return root
+            
+        game_clone = self.clone()
+        root = Tree(game_clone.heuristic_zero(), None, game_clone, None)  
+
+        possible_moves = list(game_clone.find_all_moves(start_time))
+
+        for move in possible_moves:
+            game2 = game_clone.clone()
+            (valid, _) = game2.perform_move(move)
+            
+            if valid:
+                
+                
+                child = self.find_tree(root, depth + 1, max_depth, start_time)
+                child.move = move
+                root.add_child(child)
+        
+        return root
+        
+        
+    
+    def find_all_moves(self, start_time)-> Iterable[CoordPair]:
+        game_clone = self.clone()
+        player_src = []
+        for (src,_) in self.player_units(self.next_player):
+                player_src.append(src)
+        random.shuffle(player_src)
+        for src in player_src:
+            if game_clone.is_time_up(start_time):
+                break
+            for dst in src.iter_adjacent():
+                move = CoordPair(src, dst)  # Create a CoordPair with the chosen source and adjacent destination
+                if self.is_valid_move(move):
+                    yield move
+        
+    def find_best_tree(self, maximize, start_time) -> [int, CoordPair, int]:
+        game_clone = self.clone()
+        player_src = []
+        valid_move = None
+        best_move = None
+        best_move_score = MIN_HEURISTIC_SCORE if maximize else MAX_HEURISTIC_SCORE
+        for (src,_) in self.player_units(self.next_player):
+                player_src.append(src)
+        random.shuffle(player_src)
+        for src in player_src:
+            if game_clone.is_time_up(start_time):
+                break
+            for dst in src.iter_adjacent():
+                move = CoordPair(src, dst)  # Create a CoordPair with the chosen source and adjacent destination
+                if self.is_valid_move(move):
+                    valid_move = move
+                    break
+            if valid_move is not None:
+                break
+
+        (new_score, first_move, depth) = game_clone.minimax(maximize, start_time, 0, valid_move, game_clone, None, None)
+        if maximize and best_move_score < new_score:
+            best_move = first_move
+            best_move_score = new_score
+        elif not maximize and best_move_score > new_score:
+            best_move = first_move
+            best_move_score = new_score
+        
+        if best_move is None and best_move_score is None:
+            best_move = game_clone.random_move()
+            best_move_score = game_clone.heuristic_zero()
+
+        return best_move_score, best_move, depth
+
+    def find_best_tree_1(self, maximize, start_time, game_clone : Game)-> Tuple[int, CoordPair, int]:
         player_src = []
         valid_move = None
         best_move = None
@@ -680,7 +796,32 @@ class Game:
 
 
 
+    def minimax_six(self, maximize, start_time, depth, node, best_score, move: CoordPair)-> Tuple[int, CoordPair, int]:
+        game_clone = self.clone()
+        if depth < 0 or game_clone.is_time_up(start_time) or game_clone.has_winner() or len(node.children) == 0:
+            return (game_clone.heuristic_zero(), move, depth)
         
+        if maximize:
+            max_eval = MIN_HEURISTIC_SCORE
+            best_move = None
+            for child in node.children:
+                
+                (eval, _,_) = self.minimax_six(not maximize, start_time, depth -1,child, max_eval, move)
+                if eval > max_eval:
+                    max_eval = eval
+                    best_move = child.move
+            return (max_eval, best_move, depth)
+        else:
+            min_eval = MAX_HEURISTIC_SCORE
+            best_move = None
+            for child in node.children:
+                (eval,_, _) = game_clone.minimax_six(not maximize, start_time, depth-1, child, min_eval, move)
+                if eval < min_eval:
+                    min_eval = eval
+                    best_move = child.move
+            return (min_eval, best_move, depth)
+
+
     def minimax(self, maximize, start_time, depth, make_move, game_clone : Game, node : LinkedList, best_move_score : int)-> Tuple[int, CoordPair, int]:
         print(game_clone)
         if (depth > 4 or game_clone.is_time_up(start_time) or game_clone.has_winner()):
@@ -699,6 +840,7 @@ class Game:
             trace = LinkedList(added_node)
         game_clone.next_turn()
         for move in game_clone.potential_move():
+            game_clone.find_best_tree(maximize,start_time,game_clone)
             (new_score, chosen_move, depth) = game_clone.minimax(not maximize, start_time, depth + 1, move, game_clone, trace, best_move_score)
             if maximize and best_move_score < new_score:
                 node.set_score(new_score)
@@ -725,14 +867,31 @@ class Game:
         maximize = (self.next_player is Player.Attacker)
         game_clone = self.clone()
         
+        current_score = 0
+        chosen_move = None
         best_move_pq = PriorityQueue()
         best_move_pq.put((game_clone.heuristic_zero(), game_clone.random_move()))
         if self.options.alpha_beta:
             (score, move, avg_depth) = self.alpha_beta_pruning(maximize, start_time, None, depth = 0, max_depth = 3)
         else:
-            (score, move, avg_depth) = self.find_best_tree(maximize, start_time, game_clone)
-            
-                
+            # WE RUN MINIMAX ON MULTIPLE MOVES AND STATES 
+            for move in game_clone.find_all_moves(start_time):
+                if game_clone.is_time_up(start_time):
+                    move = chosen_move
+                    score = current_score
+                    break
+                node = game_clone.find_tree(move, 0,3,start_time)
+                #weve created a tree based on a move nad run minimax on that
+                (score, move, avg_depth) = self.minimax_six(maximize,start_time,4,node,None,node.move)
+                if maximize and score > MIN_HEURISTIC_SCORE:
+                    current_score = score
+                    chosen_move = move
+                elif not maximize and score < MAX_HEURISTIC_SCORE:
+                    current_score = score
+                    chosen_move = move
+        move = chosen_move
+        score = current_score
+
 
         elapsed_seconds = (datetime.now() - start_time).total_seconds()
         self.stats.total_seconds += elapsed_seconds
