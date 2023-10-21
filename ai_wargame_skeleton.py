@@ -1,3 +1,4 @@
+
 from __future__ import annotations
 import argparse
 import copy
@@ -8,6 +9,7 @@ from time import sleep
 from typing import Tuple, TypeVar, Type, Iterable, ClassVar
 import random
 import requests
+from queue import PriorityQueue
 
 # maximum and minimum values for our heuristic scores (usually represents an end of game condition)
 MAX_HEURISTIC_SCORE = 2000000000
@@ -70,6 +72,7 @@ class Unit:
         3, # Program
         3 # Firewall
     ]
+    
 
     def is_alive(self) -> bool:
         """Are we alive ?"""
@@ -108,7 +111,7 @@ class Unit:
             return 9 - target.health
         return amount
 
-    def e0_evaluation_amount(self,target: Unit) -> int:
+    def e0_evaluation_amount(self) -> int:
         """Similar to  repair amount, determine the heursitic amount"""
         return self.e0_evaluation[self.type.value]
 
@@ -226,8 +229,7 @@ class CoordPair:
         else:
             return None
 
-##############################################################################################################
-
+##############################################################################################################000
 @dataclass(slots=True)
 class Options:
     """Representation of the game options."""
@@ -250,6 +252,63 @@ class Stats:
     total_seconds: float = 0.0
 
 ##############################################################################################################
+class Tree:
+    move: CoordPair
+    game_clone: Game;
+    
+    def __init__(self, heuristic, move, game_clone, children=None):
+        self.heuristic = heuristic
+        self.move = move
+        self.game_clone = game_clone
+        self.children = children if children is not None else []
+
+    def add_child(self, child: Iterable[Tree]):
+        self.children.append(child)
+        
+   
+        
+class NodeLL:
+    move: CoordPair
+    game_clone: Game
+    next: NodeLL
+    score: int
+    def __init__(self, move: CoordPair, game_clone: Game) -> None:
+        self.move = move
+        self.game_clone = game_clone
+        self.score = None
+        self.next = None
+    """
+    def set_score(self, score):
+        self.score = score
+
+    def get_score (self):
+        return self.score
+    """
+
+class LinkedList:
+   
+    def __init__(self, current) -> None:
+        self.current = current
+
+    def add_node(self, move : CoordPair, game_clone):
+        if self.current is None:
+            self.current = NodeLL(move, game_clone)
+        else:
+            self.current.next = NodeLL(move, game_clone)
+        return self.current
+
+    def set_score(self, score):
+        if self is not None and self.current:
+            self.current.score = score
+  
+    def get_score (self):
+        if self.current:
+            return self.current.score
+        return None
+        
+    
+
+
 
 @dataclass(slots=True)
 class Game:
@@ -261,8 +320,6 @@ class Game:
     stats: Stats = field(default_factory=Stats)
     _attacker_has_ai : bool = True
     _defender_has_ai : bool = True
-
-
     
     def create_file(self,b,t,m) -> str:
         b = str(b)
@@ -352,7 +409,7 @@ class Game:
             self.remove_dead(coord)
 
     def is_valid_move(self, coords : CoordPair) -> bool:
-        """Validate a move expressed as a CoordPair. TODO: WRITE MISSING CODE!!!"""
+        """Validate a move expressed as a CoordPair"""
         unit_src = self.get(coords.src)
         unit_dst = self.get(coords.dst)
 
@@ -363,18 +420,24 @@ class Game:
             #If current player is not using its entity (source)
             return False
         if unit_dst is not None and unit_dst is unit_src:
-            return True
+            #self-destruct only when there is your oponent around yourself
+            for coord in coords.src.iter_range(1):  
+                    unit = self.get(coord)
+                    if unit is not None and unit.player is not self.next_player:
+                        return True  
 
+        if unit_dst is not None and unit_dst.health >= 9 and unit_dst.player == unit_src.player:
+            #You cant repair if youre above 9
+            return False
         if unit_src.type._value_ in [0, 3, 4]: 
-            #Entity of either type AI, firewall or program 
+            #Entity of either type AI, program or firewall
             
             if unit_dst is None: 
                 #Check when player wants to move to an empty spot
                 for coord in coords.src.iter_adjacent():
                     adjacent_coord = self.get(coord)
                     if adjacent_coord != None and unit_src.player != adjacent_coord.player: 
-                        #Check if the adjacent unit is an adversarial unit
-                        print("You are currently engaged in combat. Select another entity to move.")
+                        #Check if the adjacent unit is an adversarial unit. If true, engaged in combat so you cannot move
                         return False
                         
                 if unit_src.player._value_ == Player.Attacker._value_: #Player: Attacker
@@ -409,34 +472,35 @@ class Game:
         
         return True
     
-        
 
-    def perform_move(self, coords: CoordPair) -> Tuple[bool, str]:
-    #Validate and perform a move expressed as a CoordPair.
+
+    def perform_move(self, coords : CoordPair) -> Tuple[bool,str]:
+        """Validate and perform a move expressed as a CoordPair"""
         if self.is_valid_move(coords):
             unit_src = self.get(coords.src)
             unit_dst = self.get(coords.dst)
-        if unit_dst != None and coords.dst != coords.src and unit_src.player == unit_dst.player:
-            health_delta = unit_src.repair_amount(unit_dst)
-            unit_dst.mod_health(health_delta)
+            if unit_dst != None and coords.dst != coords.src and unit_src.player == unit_dst.player and unit_dst.health > 9:
+                health_delta = unit_src.repair_amount(unit_dst)
+                unit_dst.mod_health(health_delta)
 
-        elif unit_dst != None and unit_dst.player != self.next_player:
-            health_delta = unit_src.damage_amount(unit_dst)
-            unit_dst.mod_health(health_delta)
-            health_delta = unit_dst.damage_amount(unit_src)
-            unit_src.mod_health(health_delta)
-        elif unit_dst != None and unit_src.player == unit_dst.player:  # Self destruction
-            for coord in coords.src.iter_range(1):  # Adjust the range as needed
-                unit = self.get(coord)
-                if unit is not None:
-                    damage_amount = unit.damage_amount(unit_dst)
-                    unit.mod_health(damage_amount)
-            self.mod_health(coords.src, -9)
+            elif unit_dst != None and unit_dst.player != self.next_player:
+                health_delta = unit_src.damage_amount(unit_dst)
+                unit_dst.mod_health(health_delta)
+                health_delta = unit_dst.damage_amount(unit_src)
+                unit_src.mod_health(health_delta)
+            elif unit_dst != None and unit_src.player == unit_dst.player and unit_src == unit_dst: #Self destruction
+                for coord in coords.src.iter_range(1):  # Adjust the range as needed
+                    unit = self.get(coord)
+                    if unit is not None:
+                        damage_amount = unit.damage_amount(unit_dst)
+                        unit.mod_health(damage_amount)   
+                self.mod_health(coords.src, -9)
+            else:
+                self.set(coords.dst,self.get(coords.src))
+                self.set(coords.src,None)
+            return (True,"")    
+        return (False,"invalid move")
 
-        print(f"Turn {self.turns_played}: {self.next_player.name} performs move {coords.src} -> {coords.dst}")
-
-        return True, "Move performed"
-        return False, "Invalid move"
 
     def next_turn(self):
         """Transitions game to the next turn."""
@@ -499,8 +563,8 @@ class Game:
             while True:
                 mv = self.get_move_from_broker()
                 if mv is not None:
-                    (success, result) = self.perform_move(mv)
-                    print(f"Broker {self.next_player.name}: ", end='')
+                    (success,result) = self.perform_move(mv)
+                    print(f"Broker {self.next_player.name}: ",end='')
                     print(result)
                     if success:
                         self.next_turn()
@@ -509,16 +573,14 @@ class Game:
         else:
             while True:
                 mv = self.read_move()
-                (success, result) = self.perform_move(mv)
+                (success,result) = self.perform_move(mv)
                 if success:
-                    print(f"Player {self.next_player.name}: ", end='')
+                    print(f"Player {self.next_player.name}: ",end='')
                     print(result)
                     self.next_turn()
                     break
                 else:
                     print("The move is not valid! Try again.")
-                    # Do not penalize the user for an invalid move. Allow them to try again.
-
 
     def computer_turn(self) -> CoordPair | None:
         """Computer plays a move."""
@@ -547,13 +609,12 @@ class Game:
         """Check if the game is over and returns winner"""
         if self.options.max_turns is not None and self.turns_played >= self.options.max_turns:
             return Player.Defender
-        elif self._attacker_has_ai:
+        if self._attacker_has_ai:
             if self._defender_has_ai:
                 return None
             else:
                 return Player.Attacker    
-        elif self._defender_has_ai:
-            return Player.Defender
+        return Player.Defender
 
     def move_candidates(self) -> Iterable[CoordPair]:
         """Generate valid move candidates for the next player."""
@@ -567,19 +628,271 @@ class Game:
             move.dst = src
             yield move.clone()
 
-    def random_move(self) -> Tuple[int, CoordPair | None, float]:
+    def random_move(self) -> CoordPair:
         """Returns a random move."""
         move_candidates = list(self.move_candidates())
         random.shuffle(move_candidates)
         if len(move_candidates) > 0:
-            return (0, move_candidates[0], 1)
+            return (move_candidates[0])
         else:
-            return (0, None, 0)
+            return (None)
+
+    def is_time_up(self, start_time)-> bool: #THIS WORKS
+        current_time = (datetime.now() - start_time).total_seconds()
+        return current_time >= self.options.max_time
+    
+
+
+    def potential_move(self) -> Iterable[CoordPair]:
+        """Generate valid move candidates for the next player."""
+        #Still need to work on this! will have to remove the while loop and add the commented section!
+        no_valid_move = True
+        player_src = []
+        for (src,_) in self.player_units(self.next_player):
+            player_src.append(src)
+        while(no_valid_move):
+            src = random.choice(player_src)
+            # Iterate through all adjacent coordinates and yield valid moves
+            for dst in src.iter_adjacent():
+                move = CoordPair(src, dst)  # Create a CoordPair with the chosen source and adjacent destination
+                if self.is_valid_move(move):
+                    no_valid_move = False
+                    yield move
+    
+    ''''
+    class Tree:
+    move: CoordPair
+    game_clone: Game;
+    
+    def __init__(self, heuristic, move, game_clone, children=None):
+        self.heuristic = heuristic
+        self.move = move
+        self.game_clone = game_clone
+        self.children = children if children is not None else []
+
+    def add_child(self, child):
+        self.children.append(child)
+        
+   
+    '''
+    def find_tre2e(self, root, depth, max_depth, start_time)-> Tree:
+        game_clone = self.clone()
+        if depth == max_depth:
+            return root
+        root = Tree(game_clone.heuristic_zero(),game_clone.perform_move,game_clone, None)
+        possible_moves = list(game_clone.find_all_moves(start_time)) 
+
+        for move in possible_moves:
+            game2 = game_clone.clone()
+            (valid,_) = game2.perform_move(move)
+            if valid:
+                child = self.find_tree(game_clone.perform_move(move),depth+1,max_depth,start_time)
+                
+                root.add_child(child)
+        return root
+    def find_tree(self, root, depth, max_depth, start_time) -> Tree:
+        if depth == max_depth:
+            return root
+            
+        game_clone = self.clone()
+        root = Tree(game_clone.heuristic_zero(), None, game_clone, None)  
+
+        possible_moves = list(game_clone.find_all_moves(start_time))
+
+        for move in possible_moves:
+            game2 = game_clone.clone()
+            (valid, _) = game2.perform_move(move)
+            
+            if valid:
+                
+                
+                child = self.find_tree(root, depth + 1, max_depth, start_time)
+                child.move = move
+                root.add_child(child)
+        
+        return root
+        
+        
+    
+    def find_all_moves(self, start_time)-> Iterable[CoordPair]:
+        game_clone = self.clone()
+        player_src = []
+        for (src,_) in self.player_units(self.next_player):
+                player_src.append(src)
+        random.shuffle(player_src)
+        for src in player_src:
+            if game_clone.is_time_up(start_time):
+                break
+            for dst in src.iter_adjacent():
+                move = CoordPair(src, dst)  # Create a CoordPair with the chosen source and adjacent destination
+                if self.is_valid_move(move):
+                    yield move
+        
+    def find_best_tree(self, maximize, start_time) -> [int, CoordPair, int]:
+        game_clone = self.clone()
+        player_src = []
+        valid_move = None
+        best_move = None
+        best_move_score = MIN_HEURISTIC_SCORE if maximize else MAX_HEURISTIC_SCORE
+        for (src,_) in self.player_units(self.next_player):
+                player_src.append(src)
+        random.shuffle(player_src)
+        for src in player_src:
+            if game_clone.is_time_up(start_time):
+                break
+            for dst in src.iter_adjacent():
+                move = CoordPair(src, dst)  # Create a CoordPair with the chosen source and adjacent destination
+                if self.is_valid_move(move):
+                    valid_move = move
+                    break
+            if valid_move is not None:
+                break
+
+        (new_score, first_move, depth) = game_clone.minimax(maximize, start_time, 0, valid_move, game_clone, None, None)
+        if maximize and best_move_score < new_score:
+            best_move = first_move
+            best_move_score = new_score
+        elif not maximize and best_move_score > new_score:
+            best_move = first_move
+            best_move_score = new_score
+        
+        if best_move is None and best_move_score is None:
+            best_move = game_clone.random_move()
+            best_move_score = game_clone.heuristic_zero()
+
+        return best_move_score, best_move, depth
+
+    def find_best_tree_1(self, maximize, start_time, game_clone : Game)-> Tuple[int, CoordPair, int]:
+        player_src = []
+        valid_move = None
+        best_move = None
+        best_move_score = MIN_HEURISTIC_SCORE if maximize else MAX_HEURISTIC_SCORE
+        for (src,_) in self.player_units(self.next_player):
+                player_src.append(src)
+        random.shuffle(player_src)
+        for src in player_src:
+            if game_clone.is_time_up(start_time):
+                break
+            for dst in src.iter_adjacent():
+                move = CoordPair(src, dst)  # Create a CoordPair with the chosen source and adjacent destination
+                if self.is_valid_move(move):
+                    valid_move = move
+                    break
+            if valid_move is not None:
+                break
+        (new_score, first_move, depth) = game_clone.minimax(maximize, start_time, 0, valid_move, game_clone, None, None)
+        if maximize and best_move_score < new_score:
+            best_move = first_move
+            best_move_score = new_score
+        elif not maximize and best_move_score > new_score:
+            best_move = first_move
+            best_move_score = new_score
+        
+        if best_move is None and best_move_score is None:
+            best_move = game_clone.random_move()
+            best_move_score = game_clone.heuristic_zero()
+
+        return best_move_score, best_move, depth
+
+
+
+    def minimax_six(self, maximize, start_time, depth, node, best_score, move: CoordPair)-> Tuple[int, CoordPair, int]:
+        game_clone = self.clone()
+        if depth < 0 or game_clone.is_time_up(start_time) or game_clone.has_winner() or len(node.children) == 0:
+            return (game_clone.heuristic_zero(), move, depth)
+        
+        if maximize:
+            max_eval = MIN_HEURISTIC_SCORE
+            best_move = None
+            for child in node.children:
+                
+                (eval, _,_) = self.minimax_six(not maximize, start_time, depth -1,child, max_eval, move)
+                if eval > max_eval:
+                    max_eval = eval
+                    best_move = child.move
+            return (max_eval, best_move, depth)
+        else:
+            min_eval = MAX_HEURISTIC_SCORE
+            best_move = None
+            for child in node.children:
+                (eval,_, _) = game_clone.minimax_six(not maximize, start_time, depth-1, child, min_eval, move)
+                if eval < min_eval:
+                    min_eval = eval
+                    best_move = child.move
+            return (min_eval, best_move, depth)
+
+
+    def minimax(self, maximize, start_time, depth, make_move, game_clone : Game, node : LinkedList, best_move_score : int)-> Tuple[int, CoordPair, int]:
+        print(game_clone)
+        if (depth > 4 or game_clone.is_time_up(start_time) or game_clone.has_winner()):
+            score = game_clone.heuristic_zero()
+            node.set_score(score)
+            return (score, make_move, depth)
+        best_move_score = MIN_HEURISTIC_SCORE if maximize else MAX_HEURISTIC_SCORE
+        
+        
+        game_clone.perform_move(make_move)
+        if node is None:
+                temp_node = NodeLL(make_move, game_clone)
+                trace = LinkedList(temp_node)
+        else:
+            added_node = node.add_node(make_move, game_clone)
+            trace = LinkedList(added_node)
+        game_clone.next_turn()
+        for move in game_clone.potential_move():
+            game_clone.find_best_tree(maximize,start_time,game_clone)
+            (new_score, chosen_move, depth) = game_clone.minimax(not maximize, start_time, depth + 1, move, game_clone, trace, best_move_score)
+            if maximize and best_move_score < new_score:
+                node.set_score(new_score)
+                best_move_score = new_score
+                #best_move_pq.put((new_score, chosen_move))
+                    
+            elif not maximize and best_move_score > new_score:
+                node.set_score(new_score)
+                best_move_score = new_score
+
+        return best_move_score, make_move, depth
+
+    
+    
+
+    def alpha_beta_pruning(self, maximize):
+        return True
+
+  
 
     def suggest_move(self) -> CoordPair | None:
         """Suggest the next move using minimax alpha beta. TODO: REPLACE RANDOM_MOVE WITH PROPER GAME LOGIC!!!"""
         start_time = datetime.now()
-        (score, move, avg_depth) = self.random_move()
+        maximize = (self.next_player is Player.Attacker)
+        game_clone = self.clone()
+        
+        current_score = 0
+        chosen_move = None
+        best_move_pq = PriorityQueue()
+        best_move_pq.put((game_clone.heuristic_zero(), game_clone.random_move()))
+        if self.options.alpha_beta:
+            (score, move, avg_depth) = self.alpha_beta_pruning(maximize, start_time, None, depth = 0, max_depth = 3)
+        else:
+            # WE RUN MINIMAX ON MULTIPLE MOVES AND STATES 
+            for move in game_clone.find_all_moves(start_time):
+                if game_clone.is_time_up(start_time):
+                    move = chosen_move
+                    score = current_score
+                    break
+                node = game_clone.find_tree(move, 0,3,start_time)
+                #weve created a tree based on a move nad run minimax on that
+                (score, move, avg_depth) = self.minimax_six(maximize,start_time,4,node,None,node.move)
+                if maximize and score > MIN_HEURISTIC_SCORE:
+                    current_score = score
+                    chosen_move = move
+                elif not maximize and score < MAX_HEURISTIC_SCORE:
+                    current_score = score
+                    chosen_move = move
+        move = chosen_move
+        score = current_score
+
+
         elapsed_seconds = (datetime.now() - start_time).total_seconds()
         self.stats.total_seconds += elapsed_seconds
         print(f"Heuristic score: {score}")
@@ -592,6 +905,7 @@ class Game:
         if self.stats.total_seconds > 0:
             print(f"Eval perf.: {total_evals/self.stats.total_seconds/1000:0.1f}k/s")
         print(f"Elapsed time: {elapsed_seconds:0.1f}s")
+        print("Computer played move "+str(move))
         return move
 
     def post_move_to_broker(self, move: CoordPair):
@@ -642,81 +956,98 @@ class Game:
         except Exception as error:
             print(f"Broker error: {error}")
         return None
-        
-    def minimax(self, depth, alpha, beta, maximizing_player):
-        if depth == 0 or self.is_finished():
-            if self.next_player == Player.Attacker:
-                return self.heuristic_zero(), None
-            else:
-                # Choose the appropriate heuristic function for the Defender
-                return self.heuristic_one(), None  # or self.heuristic_two()
-
-        if maximizing_player:
-            max_eval = float('-inf')
-            best_move = None
-            for move in self.move_candidates():
-                self.perform_move(move)
-                eval, _ = self.minimax(depth - 1, alpha, beta, False)
-                self.undo_move(move)
-                if eval > max_eval:
-                    max_eval = eval
-                    best_move = move
-                alpha = max(alpha, eval)
-                if beta <= alpha:
-                    break
-            return max_eval, best_move
-        else:
-            min_eval = float('inf')
-            best_move = None
-            for move in self.move_candidates():
-                self.perform_move(move)
-                eval, _ = self.minimax(depth - 1, alpha, beta, True)
-                self.undo_move(move)
-                if eval < min_eval:
-                    min_eval = eval
-                    best_move = move
-                beta = min(beta, eval)
-                if beta <= alpha:
-                    break
-            return min_eval, best_move
-
-
+     
     def heuristic_zero(self):
         heuristic_value = 0
         for coord in CoordPair.from_dim(self.options.dim).iter_rectangle():
             unit = self.get(coord)
             if unit is not None:
+                
                 if unit.player == Player.Defender:
-                    heuristic_value = heuristic_value - unit.e0_evaluation_amount
+                    heuristic_value -=  unit.e0_evaluation_amount()
                 else:
-                    heuristic_value = heuristic_value + unit.e0_evaluation_amount
+                    heuristic_value += unit.e0_evaluation_amount()
         return heuristic_value
+    
+    def fastest_heuristic_you_ever_seen(self):
+        count_number_valid_moves = 0
+        for coord_pair in self.move_candidates():
+            count_number_valid_moves += self.number_of_valid_moves_but_faster(coord_pair)
+        return count_number_valid_moves
+
+        
+    def number_of_valid_moves_but_faster(self,coords: CoordPair) -> int:
+        """
+        This is a faster way to check number of valid moves, because it does not account for attacks and repairs,
+        only for probable positions to move too
+        """
+        if coords.dst is None:
+            coord_row = coords.src.row
+            coord_col = coords.src.col        
+            array_of_valid_moves = [self.is_valid_coord(Coord(coord_row,coord_col-1)), self.is_valid_coord(Coord(coord_row-1,coord_col)),self.is_valid_coord(Coord(coord_row+1,coord_col)),self.is_valid_coord(Coord(coord_row,coord_col+1))] 
+            
+            return sum(array_of_valid_moves)
+        return 0
+    def number_of_valid_moves(self,coords : CoordPair) -> int:
+        """
+        For one of the heuristics, We want to know how many legal moves are possible, which also equates to position
+        """
+        #Up down left right, so it will only run a max of 4 times
+        valid_moves = 0
+        #iteratable_coords = list(coords.src.iter_adjacent())
+        for coordinate_to_move in coords.src.iter_adjacent():
+            if self.is_valid_move(coordinate_to_move) :
+                valid_moves = valid_moves + 1
+        return valid_moves
+    
+    def compare_units(unit_you: Unit, unit_enemy:Unit) -> int:
+        
+        if unit_you.type == UnitType.AI and unit_enemy.type == UnitType.Virus:
+            return -9999
+        elif unit_you.type == UnitType.Virus and unit_enemy.type == UnitType.Tech:
+            return -10
+        elif unit_you.type == UnitType.Virus and unit_enemy.type == UnitType.AI:
+            return 9999
+        elif unit_you.type == UnitType.Virus and unit_enemy.type == UnitType.Program:
+            return 1000
+        elif unit_you.type == UnitType.Tech and unit_enemy.type == UnitType.Virus:
+            return 100
+        elif unit_you.type == UnitType.Firewall and (unit_enemy.type == UnitType.AI or unit_enemy.type == UnitType.Program or unit_enemy.type == UnitType.Virus or unit_enemy.type == UnitType.Tech):
+            return 1
+        else:
+            return 0
+   
 
     def heuristic_one(self):
+        """
+        In the beginning of the game POSITION Matters more than piece trading, so assuming weve gone less than a depth of 5, 
+        use this heuristic
+        """
         heuristic_value = 0
         for coord in CoordPair.from_dim(self.options.dim).iter_rectangle():
             unit = self.get(coord)
-            if unit is not None:
+            
+            if unit is not None and self.is_valid_coord(coord):
                 if unit.player == Player.Defender:
-                    heuristic_value = heuristic_value - unit.e1_evaluation_amount
+                    heuristic_value -=  self.number_of_valid_moves(coord)
                 else:
-                    heuristic_value = heuristic_value + unit.e1_evaluation_amount
+                    heuristic_value += self.number_of_valid_moves(coord)
         return heuristic_value
-    
+
     def heuristic_two(self):
+        """
+        Endgame heuristic, once we get deeper in the game, pieces matter more than position as well as
+        those pieces in relation to the pieces they are near
+        """
         heuristic_value = 0
         for coord in CoordPair.from_dim(self.options.dim).iter_rectangle():
             unit = self.get(coord)
             if unit is not None:
-                if unit.player == Player.Defender:
-                    heuristic_value = heuristic_value - unit.e2_evaluation_amount
-                else:
-                    heuristic_value = heuristic_value + unit.e2_evaluation_amount
+                for surrounding_units in coord.iter_range(1):
+                    heuristic_value += self.compare_units(unit,surrounding_units)
+        
         return heuristic_value
-    
 
-
-    
 ##############################################################################################################
 
 def main():
@@ -724,9 +1055,9 @@ def main():
     # parse command line arguments
     max_turns = int(input("Please enter a maximum amount of turns allowed: "))
     max_time = int(input("Please enter a maximum amount(in seconds) that AI is allowed to take: "))
-
-    game_mode = str(input("Please enter a specified game mode \n Modes \n attacker \n defender \n manual \n computer \n"))
-
+    alpha_value = str(input("Please enter whether or not you are using Alpha-Beta Pruning (True or False): "))
+    game_mode = str(input("Please enter a specified game mode: \n attacker \n defender \n manual \n computer \n"))
+    
     parser = argparse.ArgumentParser(
         prog='ai_wargame',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -752,6 +1083,10 @@ def main():
 
     options.max_turns = max_turns
     options.max_time = max_time
+    if alpha_value == "False":
+        options.alpha_beta = False
+    else:
+        options.alpha_beta = alpha_value
     # override class defaults via command line options
     if args.max_depth is not None:
         options.max_depth = args.max_depth
@@ -759,6 +1094,7 @@ def main():
         options.max_time = args.max_time
     if args.broker is not None:
         options.broker = args.broker
+
 
     # create a new game
     game = Game(options=options)
@@ -768,7 +1104,7 @@ def main():
     t = options.max_time
     m = options.max_turns
     
-    file_name = game.create_file(b, t, m)
+    file_name = game.create_file(b,t,m)
     # the main game loop
     while True:
         print()
@@ -794,11 +1130,7 @@ def main():
                 print("Computer doesn't know what to do!!!")
                 exit(1)
 
-    # Display statistics after the game is finished
-    print("\nGame Statistics:")
-    print(f"Total evaluations per depth: {game.stats.evaluations_per_depth}")
-    print(f"Total time taken: {game.stats.total_seconds:.2f} seconds")
-    print(f"Avg time per move: {game.stats.total_seconds / game.turns_played:.2f} seconds")
+##############################################################################################################
 
 if __name__ == '__main__':
     main()
