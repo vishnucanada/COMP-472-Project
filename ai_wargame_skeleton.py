@@ -856,8 +856,82 @@ class Game:
     
     
 
-    def alpha_beta_pruning(self, maximize):
-        return True
+    def alpha_beta_pruning(self, maximize, start_time):
+        def alphabeta(node, depth, alpha, beta, is_maximizing):
+            if depth == 0 or game_clone.is_time_up(start_time) or game_clone.has_winner():
+                return game_clone.heuristic_zero(), node.move, depth
+
+            if is_maximizing:
+                max_eval = float("-inf")
+                best_move = None
+
+                for child in node.children:
+                    eval, _, _ = alphabeta(child, depth - 1, alpha, beta, False)
+                    if eval > max_eval:
+                        max_eval = eval
+                        best_move = child.move
+                    alpha = max(alpha, eval)
+                    if beta <= alpha:
+                        break
+                return max_eval, best_move, depth
+            else:
+                min_eval = float("inf")
+                best_move = None
+
+                for child in node.children:
+                    eval, _, _ = alphabeta(child, depth - 1, alpha, beta, True)
+                    if eval < min_eval:
+                        min_eval = eval
+                        best_move = child.move
+                    beta = min(beta, eval)
+                    if beta <= alpha:
+                        break
+                return min_eval, best_move, depth
+
+        alpha = float("-inf")
+        beta = float("inf")
+        best_move = None
+        best_move_score = MIN_HEURISTIC_SCORE if maximize else MAX_HEURISTIC_SCORE
+
+        game_clone = self.clone()
+        player_src = []
+        valid_move = None
+
+        for (src, _) in self.player_units(self.next_player):
+            player_src.append(src)
+
+        random.shuffle(player_src)
+
+        for src in player_src:
+            if game_clone.is_time_up(start_time):
+                break
+
+            for dst in src.iter_adjacent():
+                move = CoordPair(src, dst)
+
+                if self.is_valid_move(move):
+                    valid_move = move
+                    break
+
+            if valid_move is not None:
+                break
+
+        (new_score, first_move, depth) = alphabeta(
+            game_clone.find_tree(valid_move, 0, 3, start_time), 3, alpha, beta, maximize)
+
+        if maximize and best_move_score < new_score:
+            best_move = first_move
+            best_move_score = new_score
+        elif not maximize and best_move_score > new_score:
+            best_move = first_move
+            best_move_score = new_score
+
+        if best_move is None and best_move_score is None:
+            best_move = game_clone.random_move()
+            best_move_score = game_clone.heuristic_zero()
+
+        return best_move_score, best_move, depth
+
 
   
 
@@ -872,7 +946,7 @@ class Game:
         best_move_pq = PriorityQueue()
         best_move_pq.put((game_clone.heuristic_zero(), game_clone.random_move()))
         if self.options.alpha_beta:
-            (score, move, avg_depth) = self.alpha_beta_pruning(maximize, start_time, None, depth = 0, max_depth = 3)
+            (score, move, avg_depth) = self.alpha_beta_pruning(maximize, start_time)
         else:
             # WE RUN MINIMAX ON MULTIPLE MOVES AND STATES 
             for move in game_clone.find_all_moves(start_time):
