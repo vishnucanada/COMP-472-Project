@@ -15,6 +15,8 @@ from queue import PriorityQueue
 MAX_HEURISTIC_SCORE = 2000000000
 MIN_HEURISTIC_SCORE = -2000000000
 
+cumulative_evals = 0  # Initialize the counter
+
 class UnitType(Enum):
     """Every unit type."""
     AI = 0
@@ -712,7 +714,6 @@ class Game:
         
         return root
         
-        
     
     def find_all_moves(self, start_time)-> Iterable[CoordPair]:
         game_clone = self.clone()
@@ -955,7 +956,7 @@ class Game:
                     score = current_score
                     break
                 node = game_clone.find_tree(move, 0,3,start_time)
-                #weve created a tree based on a move nad run minimax on that
+                #weve created a tree based on a move and run minimax on that
                 (score, move, avg_depth) = self.minimax_six(maximize,start_time,4,node,None,node.move)
                 if maximize and score > MIN_HEURISTIC_SCORE:
                     current_score = score
@@ -970,6 +971,7 @@ class Game:
         elapsed_seconds = (datetime.now() - start_time).total_seconds()
         self.stats.total_seconds += elapsed_seconds
         print(f"Heuristic score: {score}")
+        print(f"cumulative evals: {cumulative_evals}")
         print(f"Average recursive depth: {avg_depth:0.1f}")
         print(f"Evals per depth: ",end='')
         for k in sorted(self.stats.evaluations_per_depth.keys()):
@@ -1032,6 +1034,7 @@ class Game:
         return None
      
     def heuristic_zero(self):
+        global cumulative_evals  # Declare it as global
         heuristic_value = 0
         for coord in CoordPair.from_dim(self.options.dim).iter_rectangle():
             unit = self.get(coord)
@@ -1039,9 +1042,12 @@ class Game:
                 
                 if unit.player == Player.Defender:
                     heuristic_value -=  unit.e0_evaluation_amount()
+                    cumulative_evals += 1  # Increment the counter
                 else:
                     heuristic_value += unit.e0_evaluation_amount()
+                    cumulative_evals += 1  # Increment the counter
         return heuristic_value
+    
     
     def fastest_heuristic_you_ever_seen(self):
         count_number_valid_moves = 0
@@ -1098,15 +1104,19 @@ class Game:
         use this heuristic
         """
         heuristic_value = 0
+        global cumulative_evals  # Declare it as global
         for coord in CoordPair.from_dim(self.options.dim).iter_rectangle():
             unit = self.get(coord)
             
             if unit is not None and self.is_valid_coord(coord):
                 if unit.player == Player.Defender:
                     heuristic_value -=  self.number_of_valid_moves(coord)
+                    cumulative_evals += 1  # Increment the counter
                 else:
                     heuristic_value += self.number_of_valid_moves(coord)
+                    cumulative_evals += 1  # Increment the counter
         return heuristic_value
+
 
     def heuristic_two(self):
         """
@@ -1114,13 +1124,15 @@ class Game:
         those pieces in relation to the pieces they are near
         """
         heuristic_value = 0
+        global cumulative_evals  # Declare it as global
         for coord in CoordPair.from_dim(self.options.dim).iter_rectangle():
             unit = self.get(coord)
             if unit is not None:
                 for surrounding_units in coord.iter_range(1):
                     heuristic_value += self.compare_units(unit,surrounding_units)
-        
+            cumulative_evals += 1  # Increment the counter        
         return heuristic_value
+
 
 ##############################################################################################################
 

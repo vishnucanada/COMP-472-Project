@@ -1,0 +1,243 @@
+Next player: Attacker
+Turns played: 0
+
+    0   1   2   3   4  
+A: dA9 dT9 dF9  .   .  
+B: dT9 dP9  .   .   .  
+C: dF9  .   .   .  aP9 
+D:  .   .   .  aF9 aV9 
+E:  .   .  aP9 aV9 aA9 
+Next player: Attacker
+Turns played: 0
+
+    0   1   2   3   4  
+A: dA9 dT9 dF9  .   .  
+B: dT9 dP9  .   .   .  
+C: dF9  .   .   .  aP9 
+D:  .   .   .  aF9 aV9 
+E:  .   .  aP9 aV9 aA9 
+Next player: Defender
+Turns played: 1
+
+    0   1   2   3   4  
+A: dA9 dT9 dF9  .   .  
+B: dT9 dP9  .   .   .  
+C: dF9  .   .   .  aP9 
+D:  .   .  aF9  .  aV9 
+E:  .   .  aP9 aV9 aA9 
+Next player: Attacker
+Turns played: 2
+
+    0   1   2   3   4  
+A: dA9 dT9 dF9  .   .  
+B: dT9  .   .   .   .  
+C: dF9 dP9  .   .  aP9 
+D:  .   .  aF9  .  aV9 
+E:  .   .  aP9 aV9 aA9 
+Next player: Defender
+Turns played: 3
+
+    0   1   2   3   4  
+A: dA9 dT9 dF9  .   .  
+B: dT9  .   .   .   .  
+C: dF9 dP9  .   .  aP9 
+D:  .  aF9  .   .  aV9 
+E:  .   .  aP9 aV9 aA9 
+Next player: Attacker
+Turns played: 4
+
+    0   1   2   3   4  
+A: dA9 dT9 dF9  .   .  
+B: dT9  .   .   .   .  
+C: dF9 dP8  .   .  aP9 
+D:  .  aF8  .   .  aV9 
+E:  .   .  aP9 aV9 aA9 
+Next player: Defender
+Turns played: 5
+
+    0   1   2   3   4  
+A: dA9 dT9 dF9  .   .  
+B: dT9  .   .   .   .  
+C: dF9 dP8  .  aP9  .  
+D:  .  aF8  .   .  aV9 
+E:  .   .  aP9 aV9 aA9 
+Next player: Attacker
+Turns played: 6
+
+    0   1   2   3   4  
+A: dA9 dT9 dF9  .   .  
+B:  .  dT9  .   .   .  
+C: dF9 dP8  .  aP9  .  
+D:  .  aF8  .   .  aV9 
+E:  .   .  aP9 aV9 aA9 
+Next player: Defender
+Turns played: 7
+
+    0   1   2   3   4  
+A: dA9 dT9 dF9  .   .  
+B:  .  dT9  .   .   .  
+C: dF9 dP8  .  aP9  .  
+D:  .  aF8  .  aV9 aV9 
+E:  .   .  aP9  .  aA9 
+Next player: Attacker
+Turns played: 8
+
+    0   1   2   3   4  
+A: dA9 dT9 dF9  .   .  
+B:  .  dT9  .   .   .  
+C:  .  dP8  .  aP9  .  
+D: dF9 aF8  .  aV9 aV9 
+E:  .   .  aP9  .  aA9 
+Next player: Defender
+Turns played: 9
+
+    0   1   2   3   4  
+A: dA9 dT9 dF9  .   .  
+B:  .  dT9  .   .   .  
+C:  .  dP8  .  aP9  .  
+D: dF9 aF8  .  aV9 aV9 
+E:  .  aP9  .   .  aA9 
+Next player: Attacker
+Turns played: 10
+
+    0   1   2   3   4  
+A: dA9 dT9 dF9  .   .  
+B:  .  dT9  .   .   .  
+C:  .  dP8  .  aP9  .  
+D: dF8 aF7  .  aV9 aV9 
+E:  .  aP9  .   .  aA9 
+Next player: Defender
+Turns played: 11
+
+    0   1   2   3   4  
+A: dA9 dT9 dF9  .   .  
+B:  .  dT9  .   .   .  
+C:  .  dP8  .  aP9  .  
+D: dF8 aF7 aV9  .  aV9 
+E:  .  aP9  .   .  aA9 
+Next player: Attacker
+Turns played: 12
+
+    0   1   2   3   4  
+A: dA9 dT9 dF9  .   .  
+B:  .  dT9  .   .   .  
+C:  .  dP8  .  aP9  .  
+D: dF7 aF6 aV9  .  aV9 
+E:  .  aP9  .   .  aA9 
+Next player: Defender
+Turns played: 13
+
+    0   1   2   3   4  
+A: dA9 dT9 dF9  .   .  
+B:  .  dT9  .   .   .  
+C:  .  dP8  .  aP9  .  
+D: dF7 aF6 aV9  .  aV9 
+E: aP9  .   .   .  aA9 
+Next player: Attacker
+Turns played: 14
+
+    0   1   2   3   4  
+A: dA9 dT9 dF9  .   .  
+B:  .  dT9  .   .   .  
+C:  .  dP7  .  aP9  .  
+D: dF7 aF5 aV9  .  aV9 
+E: aP9  .   .   .  aA9 
+Next player: Defender
+Turns played: 15
+
+    0   1   2   3   4  
+A: dA9 dT9 dF9  .   .  
+B:  .  dT9  .   .   .  
+C:  .  dP7  .  aP9  .  
+D: dF6 aF5 aV9  .  aV9 
+E: aP8  .   .   .  aA9 
+Next player: Attacker
+Turns played: 16
+
+    0   1   2   3   4  
+A: dA9 dT9 dF9  .   .  
+B: dT9  .   .   .   .  
+C:  .  dP7  .  aP9  .  
+D: dF6 aF5 aV9  .  aV9 
+E: aP8  .   .   .  aA9 
+Next player: Defender
+Turns played: 17
+
+    0   1   2   3   4  
+A: dA9 dT9 dF9  .   .  
+B: dT9  .   .   .   .  
+C:  .  dP7  .  aP9  .  
+D: dF6 aV9  .   .  aV9 
+E: aP8  .   .   .  aA9 
+Next player: Attacker
+Turns played: 18
+
+    0   1   2   3   4  
+A: dA9  .  dF9  .   .  
+B: dT9 dT9  .   .   .  
+C:  .  dP7  .  aP9  .  
+D: dF6 aV9  .   .  aV9 
+E: aP8  .   .   .  aA9 
+Next player: Defender
+Turns played: 19
+
+    0   1   2   3   4  
+A: dA9  .  dF9  .   .  
+B: dT9 dT9  .   .   .  
+C:  .  dP7  .  aP9  .  
+D: dF6 aV9  .  aV9  .  
+E: aP8  .   .   .  aA9 
+Next player: Attacker
+Turns played: 20
+
+    0   1   2   3   4  
+A: dA9  .  dF9  .   .  
+B:  .  dT9  .   .   .  
+C: dT9 dP7  .  aP9  .  
+D: dF6 aV9  .  aV9  .  
+E: aP8  .   .   .  aA9 
+Next player: Defender
+Turns played: 21
+
+    0   1   2   3   4  
+A: dA9  .  dF9  .   .  
+B:  .  dT9  .   .   .  
+C: dT9 dP7  .  aP9  .  
+D: dF6 aV9 aV9  .   .  
+E: aP8  .   .   .  aA9 
+Next player: Attacker
+Turns played: 22
+
+    0   1   2   3   4  
+A: dA9  .  dF9  .   .  
+B:  .  dT9  .   .   .  
+C: dT9 dP1  .  aP9  .  
+D: dF6 aV6 aV9  .   .  
+E: aP8  .   .   .  aA9 
+Next player: Defender
+Turns played: 23
+
+    0   1   2   3   4  
+A: dA9  .  dF9  .   .  
+B:  .  dT9  .   .   .  
+C: dT9 dP1  .  aP9  .  
+D: dF5 aV6 aV9  .   .  
+E: aP7  .   .   .  aA9 
+Next player: Attacker
+Turns played: 24
+
+    0   1   2   3   4  
+A: dA9  .   .   .   .  
+B:  .  dT9 dF9  .   .  
+C: dT9 dP1  .  aP9  .  
+D: dF5 aV6 aV9  .   .  
+E: aP7  .   .   .  aA9 
+Next player: Defender
+Turns played: 25
+
+    0   1   2   3   4  
+A: dA9  .   .   .   .  
+B:  .  dT9 dF9  .   .  
+C: dT9 dP1  .  aP9  .  
+D: dF5 aV6 aV9  .   .  
+E: aP7  .   .  aA9  .  
