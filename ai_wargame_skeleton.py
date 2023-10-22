@@ -963,8 +963,8 @@ class Game:
                 elif not maximize and score < MAX_HEURISTIC_SCORE:
                     current_score = score
                     chosen_move = move
-        move = chosen_move
-        score = current_score
+            move = chosen_move
+            score = current_score
 
 
         elapsed_seconds = (datetime.now() - start_time).total_seconds()
