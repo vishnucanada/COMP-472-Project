@@ -285,6 +285,9 @@ class Game:
     stats: Stats = field(default_factory=Stats)
     _attacker_has_ai : bool = True
     _defender_has_ai : bool = True
+
+    global_avg_depth = 0
+
     def retrieve_heuristic(self, depth)-> int:
         if depth not in cumulative_evaluations and depth >= 0:
             cumulative_evaluations[depth] = cumulative_evals
@@ -311,7 +314,17 @@ class Game:
         f = open(file_name,"a")
         entire_output = self.to_string()
         f.write(entire_output)
+        f.write(f"Heuristic Score: {self.heuristic_zero()}\n")
+        f.write(f"Heuristic Score: {self.heuristic_one()}\n")
+        f.write(f"Heuristic Score: {self.heuristic_two()}\n")
+        f.write(f"Cumulative evals: {cumulative_evals}\n")
+        f.write(f"Elapsed time: {self.stats.total_seconds}\n")
+        f.write(f"Average Recursive Depth: {self.global_avg_depth:0.1f}\n")
+
+            
         f.close()
+
+
 
     def write_to_file_string(self,string_to_write):
         b = str(self.options.alpha_beta)
@@ -811,6 +824,7 @@ class Game:
         
         if self.options.alpha_beta:
             (score, move, avg_depth) = self.alpha_beta_pruning(maximize, start_time)
+          #  self.global_avg_depth = avg_depth
             
         else:
             # WE RUN MINIMAX ON MULTIPLE MOVES AND STATES 

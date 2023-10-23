@@ -1,0 +1,301 @@
+Next player: Attacker
+Turns played: 0
+
+    0   1   2   3   4  
+A: dA9 dT9 dF9  .   .  
+B: dT9 dP9  .   .   .  
+C: dF9  .   .   .  aP9 
+D:  .   .   .  aF9 aV9 
+E:  .   .  aP9 aV9 aA9 
+Heuristic Score: 0
+Heuristic Score: 0
+Heuristic Score: 0
+Cumulative evals: 60
+Elapsed time: 0.0
+Average Recursive Depth: 0.0
+Next player: Defender
+Turns played: 1
+
+    0   1   2   3   4  
+A: dA9 dT9 dF9  .   .  
+B: dT9 dP9  .   .   .  
+C: dF9  .   .   .  aP9 
+D:  .   .   .  aF9 aV9 
+E:  .  aP9  .  aV9 aA9 
+Heuristic Score: 0
+Heuristic Score: 0
+Heuristic Score: 0
+Cumulative evals: 3144
+Elapsed time: 0.276326
+Average Recursive Depth: 0.0
+Next player: Attacker
+Turns played: 2
+
+    0   1   2   3   4  
+A: dA9 dT9  .   .   .  
+B: dT9 dP9 dF9  .   .  
+C: dF9  .   .   .  aP9 
+D:  .   .   .  aF9 aV9 
+E:  .  aP9  .  aV9 aA9 
+Heuristic Score: 0
+Heuristic Score: -1
+Heuristic Score: 0
+Cumulative evals: 6229
+Elapsed time: 0.554349
+Average Recursive Depth: 0.0
+Next player: Defender
+Turns played: 3
+
+    0   1   2   3   4  
+A: dA9 dT9  .   .   .  
+B: dT9 dP9 dF9  .   .  
+C: dF9  .   .   .  aP9 
+D:  .   .  aF9  .  aV9 
+E:  .  aP9  .  aV9 aA9 
+Heuristic Score: 0
+Heuristic Score: -1
+Heuristic Score: 0
+Cumulative evals: 10434
+Elapsed time: 0.963373
+Average Recursive Depth: 0.0
+Next player: Attacker
+Turns played: 4
+
+    0   1   2   3   4  
+A: dA9 dT9  .   .   .  
+B: dT9 dP9  .   .   .  
+C: dF9  .  dF9  .  aP9 
+D:  .   .  aF9  .  aV9 
+E:  .  aP9  .  aV9 aA9 
+Heuristic Score: 0
+Heuristic Score: -1
+Heuristic Score: 0
+Cumulative evals: 13603
+Elapsed time: 1.257038
+Average Recursive Depth: 0.0
+Next player: Defender
+Turns played: 5
+
+    0   1   2   3   4  
+A: dA9 dT9  .   .   .  
+B: dT9 dP9  .   .   .  
+C: dF9  .  dF9  .  aP9 
+D:  .   .  aF9 aV9  .  
+E:  .  aP9  .  aV9 aA9 
+Heuristic Score: 0
+Heuristic Score: 0
+Heuristic Score: 0
+Cumulative evals: 18993
+Elapsed time: 1.836919
+Average Recursive Depth: 0.0
+Next player: Attacker
+Turns played: 6
+
+    0   1   2   3   4  
+A: dA9 dT9  .   .   .  
+B: dT9 dP9  .   .   .  
+C: dF9  .  dF8  .  aP9 
+D:  .   .  aF8 aV9  .  
+E:  .  aP9  .  aV9 aA9 
+Heuristic Score: 0
+Heuristic Score: 0
+Heuristic Score: 0
+Cumulative evals: 22247
+Elapsed time: 2.117675
+Average Recursive Depth: 0.0
+Next player: Defender
+Turns played: 7
+
+    0   1   2   3   4  
+A: dA9 dT9  .   .   .  
+B: dT9 dP9  .   .   .  
+C: dF9  .  dF8  .  aP9 
+D:  .   .  aF8 aV9  .  
+E:  .  aP9 aV9  .  aA9 
+Heuristic Score: 0
+Heuristic Score: 0
+Heuristic Score: 0
+Cumulative evals: 28275
+Elapsed time: 3.120061
+Average Recursive Depth: 0.0
+Next player: Attacker
+Turns played: 8
+
+    0   1   2   3   4  
+A: dA9 dT9  .   .   .  
+B: dT9 dP9  .   .   .  
+C:  .   .  dF8  .  aP9 
+D: dF9  .  aF8 aV9  .  
+E:  .  aP9 aV9  .  aA9 
+Heuristic Score: 0
+Heuristic Score: 0
+Heuristic Score: 0
+Cumulative evals: 31529
+Elapsed time: 3.414441
+Average Recursive Depth: 0.0
+Next player: Attacker
+Turns played: 0
+
+    0   1   2   3   4  
+A: dA9 dT9 dF9  .   .  
+B: dT9 dP9  .   .   .  
+C: dF9  .   .   .  aP9 
+D:  .   .   .  aF9 aV9 
+E:  .   .  aP9 aV9 aA9 
+Heuristic Score: 0
+Heuristic Score: 0
+Heuristic Score: 0
+Cumulative evals: 60
+Elapsed time: 0.0
+Average Recursive Depth: 0.0
+Next player: Defender
+Turns played: 1
+
+    0   1   2   3   4  
+A: dA9 dT9 dF9  .   .  
+B: dT9 dP9  .   .   .  
+C: dF9  .   .   .  aP9 
+D:  .   .  aF9  .  aV9 
+E:  .   .  aP9 aV9 aA9 
+Heuristic Score: 0
+Heuristic Score: 0
+Heuristic Score: 0
+Cumulative evals: 1128
+Elapsed time: 0.271374
+Average Recursive Depth: 0.0
+0:33516 1:1692 2:11664 Next player: Attacker
+Turns played: 2
+
+    0   1   2   3   4  
+A: dA9 dT9  .   .   .  
+B: dT9 dP9 dF9  .   .  
+C: dF9  .   .   .  aP9 
+D:  .   .  aF9  .  aV9 
+E:  .   .  aP9 aV9 aA9 
+Heuristic Score: 0
+Heuristic Score: -1
+Heuristic Score: 0
+Cumulative evals: 2197
+Elapsed time: 0.547418
+Average Recursive Depth: 0.0
+0:111888 1:9792 2:61776 Next player: Defender
+Turns played: 3
+
+    0   1   2   3   4  
+A: dA9 dT9  .   .   .  
+B: dT9 dP9 dF9  .   .  
+C: dF9  .   .   .  aP9 
+D:  .   .  aF9  .  aV9 
+E:  .  aP9  .  aV9 aA9 
+Heuristic Score: 0
+Heuristic Score: -1
+Heuristic Score: 0
+Cumulative evals: 3602
+Elapsed time: 0.94076
+Average Recursive Depth: 0.0
+0:290360 1:27271 2:186481 Next player: Attacker
+Turns played: 4
+
+    0   1   2   3   4  
+A: dA9  .  dT9  .   .  
+B: dT9 dP9 dF9  .   .  
+C: dF9  .   .   .  aP9 
+D:  .   .  aF9  .  aV9 
+E:  .  aP9  .  aV9 aA9 
+Heuristic Score: 0
+Heuristic Score: -1
+Heuristic Score: 0
+Cumulative evals: 4671
+Elapsed time: 1.215925
+Average Recursive Depth: 0.0
+0:472640 1:50215 2:325657 Next player: Defender
+Turns played: 5
+
+    0   1   2   3   4  
+A: dA9  .  dT9  .   .  
+B: dT9 dP9 dF9  .   .  
+C: dF9  .   .   .  aP9 
+D:  .   .  aF9  .  aV9 
+E: aP9  .   .  aV9 aA9 
+Heuristic Score: 0
+Heuristic Score: -2
+Heuristic Score: 0
+Cumulative evals: 6891
+Elapsed time: 1.9791629999999998
+Average Recursive Depth: 0.0
+0:1037210 1:96682 2:748720 Next player: Attacker
+Turns played: 6
+
+    0   1   2   3   4  
+A: dA9  .  dT9  .   .  
+B: dT9  .  dF9  .   .  
+C: dF9 dP9  .   .  aP9 
+D:  .   .  aF9  .  aV9 
+E: aP9  .   .  aV9 aA9 
+Heuristic Score: 0
+Heuristic Score: -2
+Heuristic Score: 0
+Cumulative evals: 8679
+Elapsed time: 2.547713
+Average Recursive Depth: 0.0
+0:1625378 1:154930 2:1218160 Next player: Defender
+Turns played: 7
+
+    0   1   2   3   4  
+A: dA9  .  dT9  .   .  
+B: dT9  .  dF9  .   .  
+C: dF9 dP9  .   .  aP9 
+D:  .   .  aF9  .  aV9 
+E: aP9  .  aV9  .  aA9 
+Heuristic Score: 0
+Heuristic Score: -2
+Heuristic Score: 0
+Cumulative evals: 10467
+Elapsed time: 3.107849
+Average Recursive Depth: 0.0
+0:2342282 1:227482 2:1802032 Next player: Attacker
+Turns played: 8
+
+    0   1   2   3   4  
+A: dA9  .  dT9  .   .  
+B: dT9  .  dF9  .   .  
+C: dF9  .   .   .  aP9 
+D:  .  dP9 aF9  .  aV9 
+E: aP9  .  aV9  .  aA9 
+Heuristic Score: 0
+Heuristic Score: -2
+Heuristic Score: 0
+Cumulative evals: 12687
+Elapsed time: 3.877747
+Average Recursive Depth: 0.0
+0:3428492 1:326113 2:2694571 Next player: Defender
+Turns played: 9
+
+    0   1   2   3   4  
+A: dA9  .  dT9  .   .  
+B: dT9  .  dF9  .   .  
+C: dF9  .   .  aP9  .  
+D:  .  dP9 aF9  .  aV9 
+E: aP9  .  aV9  .  aA9 
+Heuristic Score: 0
+Heuristic Score: -1
+Heuristic Score: 0
+Cumulative evals: 14476
+Elapsed time: 4.43016
+Average Recursive Depth: 0.0
+0:4433972 1:430729 2:3534955 Next player: Attacker
+Turns played: 10
+
+    0   1   2   3   4  
+A: dA9  .  dT9  .   .  
+B: dT9  .  dF9  .   .  
+C:  .   .   .  aP9  .  
+D: dF9 dP9 aF9  .  aV9 
+E: aP9  .  aV9  .  aA9 
+Heuristic Score: 0
+Heuristic Score: -1
+Heuristic Score: 0
+Cumulative evals: 16697
+Elapsed time: 5.198022
+Average Recursive Depth: 0.0
+0:5880992 1:565441 2:4752223 
