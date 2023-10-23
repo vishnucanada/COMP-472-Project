@@ -453,11 +453,7 @@ class Game:
                     if unit is not None and unit.player is not self.next_player:
                         return True  
 
-<<<<<<< HEAD
-        if unit_dst is not None and unit_dst.health >= 9:
-=======
         if unit_dst is not None and unit_dst.health >= 9 and unit_dst.player == unit_src.player:
->>>>>>> main
             #You cant repair if youre above 9
             return False
         if unit_src.type._value_ in [0, 3, 4]: 
@@ -1148,14 +1144,6 @@ class Game:
         start_time = datetime.now()
         maximize = (self.next_player is Player.Attacker)
         game_clone = self.clone()
-<<<<<<< HEAD
-        if self.options.alpha_beta:
-            (score, move, avg_depth) = self.alpha_beta_pruning(maximize, start_time, None, depth = 0)
-        else:
-            (score, move, avg_depth) = self.minimax_round_four(maximize, start_time, None, 3, game_clone,None)
-            
-                
-=======
         
         current_score = 0
         chosen_move = None
@@ -1182,7 +1170,6 @@ class Game:
             move = chosen_move
             score = current_score
 
->>>>>>> main
 
         elapsed_seconds = (datetime.now() - start_time).total_seconds()
         self.stats.total_seconds += elapsed_seconds
@@ -1258,13 +1245,6 @@ class Game:
                 
                 if unit.player == Player.Defender:
                     heuristic_value -=  unit.e0_evaluation_amount()
-<<<<<<< HEAD
-                else:
-                    heuristic_value += unit.e0_evaluation_amount()
-        return heuristic_value
-    
-    def fastest_heurisic_you_ever_seen(self):
-=======
                     cumulative_evals += 1  # Increment the counter
                 else:
                     heuristic_value += unit.e0_evaluation_amount()
@@ -1273,7 +1253,6 @@ class Game:
     
     
     def fastest_heuristic_you_ever_seen(self):
->>>>>>> main
         count_number_valid_moves = 0
         for coord_pair in self.move_candidates():
             count_number_valid_moves += self.number_of_valid_moves_but_faster(coord_pair)
@@ -1328,36 +1307,13 @@ class Game:
         use this heuristic
         """
         heuristic_value = 0
-<<<<<<< HEAD
-=======
         global cumulative_evals  # Declare it as global
->>>>>>> main
         for coord in CoordPair.from_dim(self.options.dim).iter_rectangle():
             unit = self.get(coord)
             
             if unit is not None and self.is_valid_coord(coord):
                 if unit.player == Player.Defender:
                     heuristic_value -=  self.number_of_valid_moves(coord)
-<<<<<<< HEAD
-                else:
-                    heuristic_value += self.number_of_valid_moves(coord)
-        return heuristic_value
-
-    def heursitc_two(self):
-        """
-        Endgame heuristic, once we get deeper in the game, pieces matter more than position as well as
-        those pieces in relation to the pieces they are near
-        """
-        heuristic_value = 0
-        for coord in CoordPair.from_dim(self.options.dim).iter_rectangle():
-            unit = self.get(coord)
-            if unit is not None:
-                for surrounding_units in coord.iter_range(1):
-                    heuristic_value += self.compare_units(unit,surrounding_units)
-        
-        return heuristic_value
-
-=======
                     cumulative_evals += 1  # Increment the counter
                 else:
                     heuristic_value += self.number_of_valid_moves(coord)
@@ -1381,7 +1337,6 @@ class Game:
         return heuristic_value
 
 
->>>>>>> main
 ##############################################################################################################
 
 def main():
