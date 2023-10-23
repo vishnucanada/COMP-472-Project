@@ -568,6 +568,13 @@ class Game:
                 print(result)
                 
                 self.next_turn()
+            if not success:
+                print(f"Computer has entered an Invalid Move and thus lost the game ")
+                if self.next_player == Player.Attacker:
+                    self._attacker_has_ai = False
+                else:
+                    self._defender_has_ai = False
+                return 
         return mv
 
     def player_units(self, player: Player) -> Iterable[Tuple[Coord,Unit]]:
@@ -893,20 +900,7 @@ class Game:
             print(f"Broker error: {error}")
         return None
      
-    def heuristic_zero(self):
-        global cumulative_evals  # Declare it as global
-        heuristic_value = 0
-        for coord in CoordPair.from_dim(self.options.dim).iter_rectangle():
-            unit = self.get(coord)
-            if unit is not None:
-                
-                if unit.player == Player.Defender:
-                    heuristic_value -=  unit.e0_evaluation_amount()
-                    cumulative_evals += 1  # Increment the counter
-                else:
-                    heuristic_value += unit.e0_evaluation_amount()
-                    cumulative_evals += 1  # Increment the counter
-        return heuristic_value
+    
     
     
     def fastest_heuristic_you_ever_seen(self):
@@ -921,12 +915,14 @@ class Game:
         This is a faster way to check number of valid moves, because it does not account for attacks and repairs,
         only for probable positions to move too
         """
-        if coords.dst is None:
-            coord_row = coords.src.row
-            coord_col = coords.src.col        
-            array_of_valid_moves = [self.is_valid_coord(Coord(coord_row,coord_col-1)), self.is_valid_coord(Coord(coord_row-1,coord_col)),self.is_valid_coord(Coord(coord_row+1,coord_col)),self.is_valid_coord(Coord(coord_row,coord_col+1))] 
-            
-            return sum(array_of_valid_moves)
+        if coords is not None:
+
+            if coords.dst is not None:
+                coord_row = coords.src.row
+                coord_col = coords.src.col        
+                array_of_valid_moves = [self.is_valid_coord(Coord(coord_row,coord_col-1)), self.is_valid_coord(Coord(coord_row-1,coord_col)),self.is_valid_coord(Coord(coord_row+1,coord_col)),self.is_valid_coord(Coord(coord_row,coord_col+1))] 
+                
+                return sum(array_of_valid_moves)
         return 0
     def number_of_valid_moves(self,coords : CoordPair) -> int:
         """
@@ -934,14 +930,15 @@ class Game:
         """
         #Up down left right, so it will only run a max of 4 times
         valid_moves = 0
-        #iteratable_coords = list(coords.src.iter_adjacent())
+        iteratable_coords = list(coords.src.iter_adjacent())
         for coordinate_to_move in coords.src.iter_adjacent():
             if self.is_valid_move(coordinate_to_move) :
                 valid_moves = valid_moves + 1
         return valid_moves
     
     def compare_units(self, unit_you: Unit, unit_enemy:Unit) -> int:
-        
+        if unit_you is None or unit_enemy is None:
+            return 0
         if unit_you.type == UnitType.AI and unit_enemy.type == UnitType.Virus:
             return -9999
         elif unit_you.type == UnitType.Virus and unit_enemy.type == UnitType.Tech:
@@ -957,6 +954,20 @@ class Game:
         else:
             return 0
    
+    def heuristic_zero(self):
+        global cumulative_evals  # Declare it as global
+        heuristic_value = 0
+        for coord in CoordPair.from_dim(self.options.dim).iter_rectangle():
+            unit = self.get(coord)
+            if unit is not None:
+                
+                if unit.player == Player.Defender:
+                    heuristic_value -=  unit.e0_evaluation_amount()
+                    cumulative_evals += 1  # Increment the counter
+                else:
+                    heuristic_value += unit.e0_evaluation_amount()
+                    cumulative_evals += 1  # Increment the counter
+        return heuristic_value
 
     def heuristic_one(self):
         """
@@ -967,14 +978,21 @@ class Game:
         global cumulative_evals  # Declare it as global
         for coord in CoordPair.from_dim(self.options.dim).iter_rectangle():
             unit = self.get(coord)
-            
-            if unit is not None and self.is_valid_coord(coord):
-                if unit.player == Player.Defender:
-                    heuristic_value -=  self.number_of_valid_moves(coord)
-                    cumulative_evals += 1  # Increment the counter
-                else:
-                    heuristic_value += self.number_of_valid_moves(coord)
-                    cumulative_evals += 1  # Increment the counter
+            if coord is not None and unit is not None:
+                
+                a1 = Coord(coord.row,coord.col-1) #left
+                a2 = Coord(coord.row-1,coord.col) #up
+                a3 = Coord(coord.row+1,coord.col) #down
+                a4 = Coord(coord.row,coord.col+1) #right
+                iterable_coordinates = [a1,a2,a3,a4]
+                for new_coord in iterable_coordinates:
+                    if self.is_valid_coord(new_coord):
+                        if unit.player == Player.Defender:
+                            heuristic_value -=  1
+                            cumulative_evals += 1  # Increment the counter
+                        else:
+                            heuristic_value += 1
+                            cumulative_evals += 1  # Increment the counter
         return heuristic_value
 
 
@@ -986,11 +1004,15 @@ class Game:
         heuristic_value = 0
         global cumulative_evals  # Declare it as global
         for coord in CoordPair.from_dim(self.options.dim).iter_rectangle():
-            unit = self.get(coord)
-            if unit is not None:
-                for surrounding_units in coord.iter_range(1):
-                    heuristic_value += self.compare_units(unit,surrounding_units)
-            cumulative_evals += 1  # Increment the counter        
+            
+            unit_src = self.get(coord)
+            unit_dst = self.get(coord)
+            if unit_src is not None and unit_dst is not None:
+                if unit_src.player == Player.Defender:
+                    heuristic_value += self.compare_units(unit_src,unit_dst)
+                if unit_dst.player == Player.Attacker:
+                    heuristic_value -= self.compare_units(unit_src,unit_dst)
+                cumulative_evals += 1  # Increment the counter        
         return heuristic_value
 
 

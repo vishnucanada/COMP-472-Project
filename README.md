@@ -52,3 +52,7 @@ To change the game settings, use these arguments when running the script.
 
 
 
+D2 Read Me
+
+The users now have the option of choosing between multiple heuristics of e0 e1 e2
+By writing 0 1 2
