@@ -323,6 +323,9 @@ class Game:
     _attacker_has_ai : bool = True
     _defender_has_ai : bool = True
     
+    def __init__(self) -> None:
+        self.global_avg_depth = 0
+
     def create_file(self,b,t,m) -> str:
         b = str(b)
         t = str(t)
@@ -333,14 +336,17 @@ class Game:
         return str(file_name)
     
     
-    def write_to_file(self,file_name):
+    def write_to_file(self,file_name ):
         f = open(file_name,"a")
         entire_output = self.to_string()
         f.write(entire_output)
+
         f.write(f"Heuristic Score: {self.heuristic_zero()}\n")
+        f.write(f"Heuristic Score: {self.heuristic_one()}\n")
+        f.write(f"Heuristic Score: {self.heuristic_two()}\n")
         f.write(f"Cumulative evals: {cumulative_evals}\n")
-       # f.write(f"Elapsed time: {}\n")
-       # f.write(f"Average Recursive Depth: {}\n")
+        f.write(f"Elapsed time: {self.stats.total_seconds}\n")
+        f.write(f"Average Recursive Depth: {self.global_avg_depth:0.1f}\n")
 
         f.close()
 
@@ -953,6 +959,7 @@ class Game:
         best_move_pq.put((game_clone.heuristic_zero(), game_clone.random_move()))
         if self.options.alpha_beta:
             (score, move, avg_depth) = self.alpha_beta_pruning(maximize, start_time)
+            self.global_avg_depth = avg_depth
         else:
             # WE RUN MINIMAX ON MULTIPLE MOVES AND STATES 
             for move in game_clone.find_all_moves(start_time):
@@ -1194,8 +1201,10 @@ def main():
     b = options.alpha_beta
     t = options.max_time
     m = options.max_turns
+    #e = options.heuristic_value
     
-    file_name = game.create_file(b,t,m)
+
+    file_name = game.create_file(b,t,m, '''e''')
     # the main game loop
     while True:
         print()
