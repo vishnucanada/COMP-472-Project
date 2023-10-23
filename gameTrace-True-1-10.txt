@@ -1,0 +1,261 @@
+Next player: Attacker
+Turns played: 0
+
+    0   1   2   3   4  
+A: dA9 dT9 dF9  .   .  
+B: dT9 dP9  .   .   .  
+C: dF9  .   .   .  aP9 
+D:  .   .   .  aF9 aV9 
+E:  .   .  aP9 aV9 aA9 
+Heuristic Score: 0
+Next player: Attacker
+Turns played: 0
+
+    0   1   2   3   4  
+A: dA9 dT9 dF9  .   .  
+B: dT9 dP9  .   .   .  
+C: dF9  .   .   .  aP9 
+D:  .   .   .  aF9 aV9 
+E:  .   .  aP9 aV9 aA9 
+Heuristic Score: 0
+Next player: Defender
+Turns played: 1
+
+    0   1   2   3   4  
+A: dA9 dT9 dF9  .   .  
+B: dT9 dP9  .   .   .  
+C: dF9  .   .   .  aP9 
+D:  .   .  aF9  .  aV9 
+E:  .   .  aP9 aV9 aA9 
+Heuristic Score: 0
+Next player: Attacker
+Turns played: 2
+
+    0   1   2   3   4  
+A: dA9 dT9 dF9  .   .  
+B: dT9  .   .   .   .  
+C: dF9 dP9  .   .  aP9 
+D:  .   .  aF9  .  aV9 
+E:  .   .  aP9 aV9 aA9 
+Heuristic Score: 0
+Next player: Defender
+Turns played: 3
+
+    0   1   2   3   4  
+A: dA9 dT9 dF9  .   .  
+B: dT9  .   .   .   .  
+C: dF9 dP9  .   .  aP9 
+D:  .   .  aF9  .  aV9 
+E:  .  aP9  .  aV9 aA9 
+Heuristic Score: 0
+Next player: Attacker
+Turns played: 4
+
+    0   1   2   3   4  
+A: dA9  .  dF9  .   .  
+B: dT9 dT9  .   .   .  
+C: dF9 dP9  .   .  aP9 
+D:  .   .  aF9  .  aV9 
+E:  .  aP9  .  aV9 aA9 
+Heuristic Score: 0
+Next player: Defender
+Turns played: 5
+
+    0   1   2   3   4  
+A: dA9  .  dF9  .   .  
+B: dT9 dT9  .   .   .  
+C: dF9 dP9  .   .  aP9 
+D:  .   .  aF9  .  aV9 
+E:  .  aP9 aV9  .  aA9 
+Heuristic Score: 0
+Next player: Attacker
+Turns played: 6
+
+    0   1   2   3   4  
+A: dA9  .  dF9  .   .  
+B: dT9 dT9  .   .   .  
+C: dF9  .   .   .  aP9 
+D:  .  dP9 aF9  .  aV9 
+E:  .  aP9 aV9  .  aA9 
+Heuristic Score: 0
+Next player: Defender
+Turns played: 7
+
+    0   1   2   3   4  
+A: dA9  .  dF9  .   .  
+B: dT9 dT9  .   .   .  
+C: dF9  .   .   .  aP9 
+D:  .  dP8 aF8  .  aV9 
+E:  .  aP9 aV9  .  aA9 
+Heuristic Score: 0
+Next player: Attacker
+Turns played: 8
+
+    0   1   2   3   4  
+A:  .  dA9 dF9  .   .  
+B: dT9 dT9  .   .   .  
+C: dF9  .   .   .  aP9 
+D:  .  dP8 aF8  .  aV9 
+E:  .  aP9 aV9  .  aA9 
+Heuristic Score: 0
+Next player: Defender
+Turns played: 9
+
+    0   1   2   3   4  
+A:  .  dA9 dF9  .   .  
+B: dT9 dT9  .   .   .  
+C: dF9  .   .   .  aP9 
+D:  .  dP7 aF7  .  aV9 
+E:  .  aP9 aV9  .  aA9 
+Heuristic Score: 0
+Next player: Attacker
+Turns played: 10
+
+    0   1   2   3   4  
+A:  .  dA9 dF9  .   .  
+B: dT9 dT9  .   .   .  
+C:  .   .   .   .  aP9 
+D: dF9 dP7 aF7  .  aV9 
+E:  .  aP9 aV9  .  aA9 
+Heuristic Score: 0
+Next player: Attacker
+Turns played: 0
+
+    0   1   2   3   4  
+A: dA9 dT9 dF9  .   .  
+B: dT9 dP9  .   .   .  
+C: dF9  .   .   .  aP9 
+D:  .   .   .  aF9 aV9 
+E:  .   .  aP9 aV9 aA9 
+Heuristic Score: 0
+Next player: Attacker
+Turns played: 0
+
+    0   1   2   3   4  
+A: dA9 dT9 dF9  .   .  
+B: dT9 dP9  .   .   .  
+C: dF9  .   .   .  aP9 
+D:  .   .   .  aF9 aV9 
+E:  .   .  aP9 aV9 aA9 
+Heuristic Score: 0
+Next player: Attacker
+Turns played: 0
+
+    0   1   2   3   4  
+A: dA9 dT9 dF9  .   .  
+B: dT9 dP9  .   .   .  
+C: dF9  .   .   .  aP9 
+D:  .   .   .  aF9 aV9 
+E:  .   .  aP9 aV9 aA9 
+Heuristic Score: 0
+Cumulative evals: 12
+Next player: Defender
+Turns played: 1
+
+    0   1   2   3   4  
+A: dA9 dT9 dF9  .   .  
+B: dT9 dP9  .   .   .  
+C: dF9  .   .   .  aP9 
+D:  .   .  aF9  .  aV9 
+E:  .   .  aP9 aV9 aA9 
+Heuristic Score: 0
+Cumulative evals: 1044
+Next player: Attacker
+Turns played: 2
+
+    0   1   2   3   4  
+A: dA9 dT9 dF9  .   .  
+B: dT9  .   .   .   .  
+C: dF9 dP9  .   .  aP9 
+D:  .   .  aF9  .  aV9 
+E:  .   .  aP9 aV9 aA9 
+Heuristic Score: 0
+Cumulative evals: 2076
+Next player: Defender
+Turns played: 3
+
+    0   1   2   3   4  
+A: dA9 dT9 dF9  .   .  
+B: dT9  .   .   .   .  
+C: dF9 dP9  .   .  aP9 
+D:  .   .  aF9  .  aV9 
+E:  .  aP9  .  aV9 aA9 
+Heuristic Score: 0
+Cumulative evals: 3444
+Next player: Attacker
+Turns played: 4
+
+    0   1   2   3   4  
+A: dA9 dT9 dF9  .   .  
+B:  .  dT9  .   .   .  
+C: dF9 dP9  .   .  aP9 
+D:  .   .  aF9  .  aV9 
+E:  .  aP9  .  aV9 aA9 
+Heuristic Score: 0
+Cumulative evals: 4812
+Next player: Defender
+Turns played: 5
+
+    0   1   2   3   4  
+A: dA9 dT9 dF9  .   .  
+B:  .  dT9  .   .   .  
+C: dF9 dP9  .   .  aP9 
+D:  .   .  aF9  .  aV9 
+E: aP9  .   .  aV9 aA9 
+Heuristic Score: 0
+Cumulative evals: 6996
+Next player: Attacker
+Turns played: 6
+
+    0   1   2   3   4  
+A: dA9 dT9  .   .   .  
+B:  .  dT9 dF9  .   .  
+C: dF9 dP9  .   .  aP9 
+D:  .   .  aF9  .  aV9 
+E: aP9  .   .  aV9 aA9 
+Heuristic Score: 0
+Cumulative evals: 8748
+Next player: Defender
+Turns played: 7
+
+    0   1   2   3   4  
+A: dA9 dT9  .   .   .  
+B:  .  dT9 dF9  .   .  
+C: dF9 dP9  .   .  aP9 
+D:  .  aF9  .   .  aV9 
+E: aP9  .   .  aV9 aA9 
+Heuristic Score: 0
+Cumulative evals: 10500
+Next player: Attacker
+Turns played: 8
+
+    0   1   2   3   4  
+A:  .  dT9  .   .   .  
+B: dA9 dT9 dF9  .   .  
+C: dF9 dP9  .   .  aP9 
+D:  .  aF9  .   .  aV9 
+E: aP9  .   .  aV9 aA9 
+Heuristic Score: 0
+Cumulative evals: 11868
+Next player: Defender
+Turns played: 9
+
+    0   1   2   3   4  
+A:  .  dT9  .   .   .  
+B: dA9 dT9 dF9  .   .  
+C: dF9 dP8  .   .  aP9 
+D:  .  aF8  .   .  aV9 
+E: aP9  .   .  aV9 aA9 
+Heuristic Score: 0
+Cumulative evals: 13236
+Next player: Attacker
+Turns played: 10
+
+    0   1   2   3   4  
+A:  .  dT9  .   .   .  
+B: dA9 dT9 dF9  .   .  
+C:  .  dP8  .   .  aP9 
+D: dF9 aF8  .   .  aV9 
+E: aP9  .   .  aV9 aA9 
+Heuristic Score: 0
+Cumulative evals: 14988

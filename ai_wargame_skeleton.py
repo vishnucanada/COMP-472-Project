@@ -337,6 +337,11 @@ class Game:
         f = open(file_name,"a")
         entire_output = self.to_string()
         f.write(entire_output)
+        f.write(f"Heuristic Score: {self.heuristic_zero()}\n")
+        f.write(f"Cumulative evals: {cumulative_evals}\n")
+       # f.write(f"Elapsed time: {}\n")
+       # f.write(f"Average Recursive Depth: {}\n")
+
         f.close()
 
     def write_to_file_string(self,string_to_write):
