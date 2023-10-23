@@ -16,7 +16,7 @@ MAX_HEURISTIC_SCORE = 2000000000
 MIN_HEURISTIC_SCORE = -2000000000
 
 cumulative_evals = 0  # Initialize the counter
-
+cumulative_evaluations = {}
 class UnitType(Enum):
     """Every unit type."""
     AI = 0
@@ -269,46 +269,9 @@ class Tree:
         
    
         
-class NodeLL:
-    move: CoordPair
-    game_clone: Game
-    next: NodeLL
-    score: int
-    def __init__(self, move: CoordPair, game_clone: Game) -> None:
-        self.move = move
-        self.game_clone = game_clone
-        self.score = None
-        self.next = None
-    """
-    def set_score(self, score):
-        self.score = score
 
-    def get_score (self):
-        return self.score
-    """
 
-class LinkedList:
-   
-    def __init__(self, current) -> None:
-        self.current = current
 
-    def add_node(self, move : CoordPair, game_clone):
-        if self.current is None:
-            self.current = NodeLL(move, game_clone)
-        else:
-            self.current.next = NodeLL(move, game_clone)
-        return self.current
-
-    def set_score(self, score):
-        if self is not None and self.current:
-            self.current.score = score
-  
-    def get_score (self):
-        if self.current:
-            return self.current.score
-        return None
-        
-    
 
 
 
@@ -322,14 +285,18 @@ class Game:
     stats: Stats = field(default_factory=Stats)
     _attacker_has_ai : bool = True
     _defender_has_ai : bool = True
-    def retrieve_heuristic(self)-> int:
+    def retrieve_heuristic(self, depth)-> int:
+        if depth not in cumulative_evaluations and depth >= 0:
+            cumulative_evaluations[depth] = cumulative_evals
+        elif depth >= 0:
+            current_val = cumulative_evaluations[depth]
+            cumulative_evaluations[depth] = current_val + cumulative_evals
         if self.options.heuristic == 1:
             return self.heuristic_one()
         elif self.options.heuristic == 2:
             return self.heuristic_two()
         else:
             return self.heuristic_zero()
-        
     def create_file(self,b,t,m) -> str:
         b = str(b)
         t = str(t)
@@ -675,8 +642,13 @@ class Game:
             return root
         
         game_clone = self.clone()
-        root = Tree(game_clone.retrieve_heuristic(), None, game_clone, None)  
 
+        
+        root = Tree(game_clone.retrieve_heuristic(depth), None, game_clone, None)  
+        
+        
+
+            
         possible_moves = list(game_clone.find_all_moves(start_time))
 
         for move in possible_moves:
@@ -713,7 +685,9 @@ class Game:
     def minimax(self, maximize, start_time, depth, node, best_score, move: CoordPair)-> Tuple[int, CoordPair, int]:
         game_clone = self.clone()
         if depth < 0 or game_clone.is_time_up(start_time) or game_clone.has_winner() or len(node.children) == 0:
-            return (game_clone.retrieve_heuristic(), move, depth)
+           
+            
+            return (game_clone.retrieve_heuristic(depth), move, depth)
         
         if maximize:
             max_eval = MIN_HEURISTIC_SCORE
@@ -741,7 +715,8 @@ class Game:
     def alpha_beta_pruning(self, maximize, start_time):
         def alphabeta(node, depth, alpha, beta, is_maximizing):
             if depth == 0 or game_clone.is_time_up(start_time) or game_clone.has_winner():
-                return game_clone.retrieve_heuristic(), node.move, depth
+                
+                return game_clone.retrieve_heuristic(depth), node.move, depth
 
             if is_maximizing:
                 max_eval = float("-inf")
@@ -810,7 +785,8 @@ class Game:
 
         if best_move is None and best_move_score is None:
             best_move = game_clone.random_move()
-            best_move_score = game_clone.retrieve_heuristic()
+            
+            best_move_score = game_clone.retrieve_heuristic(depth)
 
         return best_move_score, best_move, depth
 
@@ -851,13 +827,16 @@ class Game:
 
         elapsed_seconds = (datetime.now() - start_time).total_seconds()
         self.stats.total_seconds += elapsed_seconds
+        
         print(f"Heuristic score: {score}")
-        print(f"cumulative evals: {cumulative_evals}")
+        print(f"cumulative evals: "+str(sum(cumulative_evaluations.values())))
         print(f"Average recursive depth: {avg_depth:0.1f}")
         print(f"Evals per depth: ",end='')
-        for k in sorted(self.stats.evaluations_per_depth.keys()):
-            print(f"{k}:{self.stats.evaluations_per_depth[k]} ",end='')
+
+        for key in sorted(cumulative_evaluations.keys()):
+            print(f"{key}:{cumulative_evaluations[key]} ",end='')
         print()
+        
         total_evals = sum(self.stats.evaluations_per_depth.values())
         if self.stats.total_seconds > 0:
             print(f"Eval perf.: {total_evals/self.stats.total_seconds/1000:0.1f}k/s")
