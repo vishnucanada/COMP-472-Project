@@ -413,7 +413,7 @@ class Game:
             #self-destruct only when there is your oponent around yourself
             for coord in coords.src.iter_range(1):  
                     unit = self.get(coord)
-                    if unit is not None and unit.player is not self.next_player:
+                    if unit is not None:
                         return True  
 
         if unit_dst is not None and unit_dst.health >= 9 and unit_dst.player == unit_src.player:
