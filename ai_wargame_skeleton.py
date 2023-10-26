@@ -314,13 +314,14 @@ class Game:
         f = open(file_name,"a")
         entire_output = self.to_string()
         f.write(entire_output)
-        f.write(f"Heuristic Score: {self.heuristic_zero()}\n")
-        f.write(f"Heuristic Score: {self.heuristic_one()}\n")
-        f.write(f"Heuristic Score: {self.heuristic_two()}\n")
+        f.write(f"Heuristic Score: {self.options.heuristic}\n")
         f.write(f"Cumulative evals: {cumulative_evals}\n")
         f.write(f"Elapsed time: {self.stats.total_seconds}\n")
         f.write(f"Average Recursive Depth: {self.global_avg_depth:0.1f}\n")
-
+        f.write("Evals per depth: ")
+        for key in sorted(cumulative_evaluations.keys()):
+            # Write the depth and corresponding evaluations to the file
+            f.write(f"{key}:{cumulative_evaluations[key]}\n ")
             
         f.close()
 
@@ -521,6 +522,11 @@ class Game:
                 else:
                     output += f"{str(unit):^3} "
             output += "\n"
+
+        if self.has_winner() == Player.Attacker:
+            print("Attacker wins in " + str(self.turns_played) + " moves")
+        elif self.has_winner() == Player.Defender:
+            print("Defender wins in " + str(self.turns_played) + " moves")
         return output
 
     def __str__(self) -> str:
@@ -662,13 +668,7 @@ class Game:
             return root
         
         game_clone = self.clone()
-
-        
         root = Tree(game_clone.retrieve_heuristic(depth), None, game_clone, None)  
-        
-        
-
-            
         possible_moves = list(game_clone.find_all_moves(start_time))
 
         for move in possible_moves:
@@ -676,8 +676,6 @@ class Game:
             (valid, _) = game2.perform_move(move)
             
             if valid:
-                
-                
                 child = self.find_tree(root, depth + 1, max_depth, start_time)
                 child.move = move
                 root.add_child(child)
@@ -705,20 +703,19 @@ class Game:
     def minimax(self, maximize, start_time, depth, node, best_score, move: CoordPair)-> Tuple[int, CoordPair, int]:
         game_clone = self.clone()
         if depth < 0 or game_clone.is_time_up(start_time) or game_clone.has_winner() or len(node.children) == 0:
-           
-            
             return (game_clone.retrieve_heuristic(depth), move, depth)
         
+        # Attacker playing
         if maximize:
             max_eval = MIN_HEURISTIC_SCORE
             best_move = None
             for child in node.children:
-                
                 (eval, _,_) = self.minimax(not maximize, start_time, depth -1,child, max_eval, move)
                 if eval > max_eval:
                     max_eval = eval
                     best_move = child.move
             return (max_eval, best_move, depth)
+        #Defender playing
         else:
             min_eval = MAX_HEURISTIC_SCORE
             best_move = None
@@ -735,7 +732,6 @@ class Game:
     def alpha_beta_pruning(self, maximize, start_time):
         def alphabeta(node, depth, alpha, beta, is_maximizing):
             if depth == 0 or game_clone.is_time_up(start_time) or game_clone.has_winner():
-                
                 return game_clone.retrieve_heuristic(depth), node.move, depth
 
             if is_maximizing:
@@ -805,12 +801,11 @@ class Game:
 
         if best_move is None and best_move_score is None:
             best_move = game_clone.random_move()
-            
             best_move_score = game_clone.retrieve_heuristic(depth)
 
         return best_move_score, best_move, depth
 
-
+    
   
 
     def suggest_move(self) -> CoordPair | None:
@@ -824,7 +819,7 @@ class Game:
         
         if self.options.alpha_beta:
             (score, move, avg_depth) = self.alpha_beta_pruning(maximize, start_time)
-          #  self.global_avg_depth = avg_depth
+          
             
         else:
             # WE RUN MINIMAX ON MULTIPLE MOVES AND STATES 
@@ -833,7 +828,7 @@ class Game:
                     move = chosen_move
                     score = current_score
                     break
-                node = game_clone.find_tree(move, 0,3,start_time)
+                node = game_clone.find_tree(move, 0, 2, start_time)
                 #weve created a tree based on a move and run minimax on that
                 (score, move, avg_depth) = self.minimax(maximize,start_time,4,node,None,node.move)
                 if maximize and score > MIN_HEURISTIC_SCORE:
@@ -848,16 +843,14 @@ class Game:
 
         elapsed_seconds = (datetime.now() - start_time).total_seconds()
         self.stats.total_seconds += elapsed_seconds
-        
+
         print(f"Heuristic score: {score}")
         print(f"cumulative evals: "+str(sum(cumulative_evaluations.values())))
         print(f"Average recursive depth: {avg_depth:0.1f}")
         print(f"Evals per depth: ",end='')
-
         for key in sorted(cumulative_evaluations.keys()):
             print(f"{key}:{cumulative_evaluations[key]} ",end='')
         print()
-        
         total_evals = sum(cumulative_evaluations.values())
         if self.stats.total_seconds > 0:
             print(f"Eval perf.: {total_evals/self.stats.total_seconds/1000:0.1f}k/s")
