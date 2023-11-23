@@ -732,39 +732,34 @@ class Game:
     def alpha_beta_pruning(self, maximize, start_time):
         def alphabeta(node, depth, alpha, beta, is_maximizing):
             if depth == 0 or game_clone.is_time_up(start_time) or game_clone.has_winner():
-                return game_clone.heuristic_zero(), node.move, depth, 0  # Include 0 for child count
+                return game_clone.retrieve_heuristic(depth), node.move, depth
 
             if is_maximizing:
                 max_eval = float("-inf")
                 best_move = None
-                child_count = 0  # Initialize child count
 
                 for child in node.children:
-                    eval, _, _, child_children = alphabeta(child, depth - 1, alpha, beta, False)  # Get child's child count
-                    child_count += 1 + child_children  # Add 1 for this child and the child's children
+                    eval, _, _ = alphabeta(child, depth - 1, alpha, beta, False)
                     if eval > max_eval:
                         max_eval = eval
                         best_move = child.move
                     alpha = max(alpha, eval)
                     if beta <= alpha:
                         break
-                return max_eval, best_move, depth, child_count  # Include child count
+                return max_eval, best_move, depth
             else:
                 min_eval = float("inf")
                 best_move = None
-                child_count = 0  # Initialize child count
 
                 for child in node.children:
-                    eval, _, _, child_children = alphabeta(child, depth - 1, alpha, beta, True)  # Get child's child count
-                    child_count += 1 + child_children  # Add 1 for this child and the child's children
+                    eval, _, _ = alphabeta(child, depth - 1, alpha, beta, True)
                     if eval < min_eval:
                         min_eval = eval
                         best_move = child.move
                     beta = min(beta, eval)
                     if beta <= alpha:
                         break
-                return min_eval, best_move, depth, child_count  # Include child count
-
+                return min_eval, best_move, depth
 
         alpha = float("-inf")
         beta = float("inf")
